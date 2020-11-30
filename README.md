@@ -4,14 +4,14 @@ Inspired by the [validator](https://github.com/Keats/validator) crate.
 
 ## Overview
 
-```
+```rust
 [dependencies]
 sanitizer = { version = "0.1", features = ["derive"] }
 ```
 
 Full example with different options:
 
-```
+```rust
 use serde::Deserialize;
 
 use sanitizer::{Sanitize, SanitizeError};
