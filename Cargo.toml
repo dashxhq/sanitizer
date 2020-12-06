@@ -1,0 +1,18 @@
+[package]
+name = "sanitizer"
+version = "0.1.0"
+authors = ["weegee <somilsharma627@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+Inflector = "0.11.4"
+phonenumber = "0.3.1+8.12.9"
+
+[dependencies.sanitizer_macros]
+path = "sanitizer-macros"
+version = "0.1"
+
+[workspace]
+members = [ "sanitizer-macros" ]
