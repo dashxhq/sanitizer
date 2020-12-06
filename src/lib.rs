@@ -32,6 +32,7 @@
 //! 	assert_eq!(instance.email, "johndoe123@email.com");
 //! }
 //! ```
+//! To see a list of available sanitizers, check the [sanitizer-macros crate](../sanitizer_macros/derive.Sanitize.html)
 mod sanitize;
 
 pub use crate::sanitize::{Sanitize, Sanitizer};

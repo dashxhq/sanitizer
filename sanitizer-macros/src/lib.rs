@@ -39,14 +39,14 @@ mod sanitizer;
 ///
 /// # Available sanitizers
 ///
-/// **Trim**: Trims the string.
-/// **numeric**: Remove numeric items from the string.
-/// **alphanumeric**: Remove alphanumeric items from the string.
-/// **lower_case**: Convert input to lower case.
-/// **upper_case**: Convert input to upper case.
-/// **camel_case**: Convert input to camel case.
-/// **snake_case**: Convert input to snake case.
-/// **screaming_snake_case**: Convert input to screaming snake case.
+/// - **Trim**: Trims the string.
+/// - **numeric**: Remove numeric items from the string.
+/// - **alphanumeric**: Remove alphanumeric items from the string.
+/// - **lower_case**: Convert input to lower case.
+/// - **upper_case**: Convert input to upper case.
+/// - **camel_case**: Convert input to camel case.
+/// - **snake_case**: Convert input to snake case.
+/// - **screaming_snake_case**: Convert input to screaming snake case.
 ///
 /// Right now, the macro only supports fields that have the type `String`
 #[proc_macro_derive(Sanitize, attributes(sanitize))]
