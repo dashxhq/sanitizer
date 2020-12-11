@@ -2,16 +2,48 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use syn::{Data, Fields, FieldsNamed, Ident, Meta, NestedMeta, Type};
+use syn::{Data, Fields, FieldsNamed, Ident, Lit, Meta, NestedMeta, Type};
 
-/// SanitizerError is a custom error type that includes
-/// info on why proc macro parsing for Sanitizer crate failed
+// SanitizerError is a custom error type that includes
+// info on why proc macro parsing for Sanitizer crate failed
 #[derive(Debug)]
 pub struct SanitizerError(u8);
 
 impl SanitizerError {
     pub fn new(code: u8) -> Self {
         Self(code)
+    }
+}
+
+pub enum PathOrList {
+    Path(Ident),
+    List(Ident, usize),
+}
+
+impl PathOrList {
+    pub fn has_args(&self) -> bool {
+        if let Self::List(_, _) = self {
+            true
+        } else {
+            false
+        }
+    }
+    pub fn get_args(&self) -> usize {
+        if let Self::List(_, x) = self {
+            *x
+        } else {
+            panic!("{:?}", "Arugment not found");
+        }
+    }
+}
+
+impl Display for PathOrList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        let y = match self {
+            Self::Path(x) => x.to_string(),
+            Self::List(x, _) => x.to_string(),
+        };
+        write!(f, "{}", y)
     }
 }
 
@@ -24,6 +56,8 @@ impl Display for SanitizerError {
             3 => "Macro can be only applied on structs",
             4 => "Macros that contain a structured meta list are allowed only",
             5 => "Invalid sanitizer",
+            6 => "This sanitizer takes a single argument",
+            7 => "The argument can be only 64 bit int",
             _ => "",
         };
         write!(f, "{}", case)
@@ -63,6 +97,7 @@ pub fn populate_map(
             for attr in field.attrs.iter() {
                 // parse the attribute
                 let meta = attr.parse_meta().unwrap();
+
                 match meta {
                     // the attribute should be a list. for eg. sanitise(options)
                     Meta::List(ref list) => {
@@ -100,15 +135,47 @@ pub fn field_type(field_type: Type) -> Result<Ident, SanitizerError> {
 }
 
 // helper function to get the list item as ident
-pub fn meta_list(meta: &NestedMeta) -> Result<Ident, SanitizerError> {
+pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
     match meta {
-        NestedMeta::Meta(x) => {
-            if let Some(y) = x.path().get_ident() {
-                Ok(y.clone())
-            } else {
-                Err(SanitizerError(4))
+        NestedMeta::Meta(x) => match x {
+            Meta::Path(y) => {
+                if let Some(x) = y.get_ident() {
+                    Ok(PathOrList::Path(x.clone()))
+                } else {
+                    Err(SanitizerError(4))
+                }
             }
-        }
+            Meta::List(y) => {
+                if let Some(x) = y.path.get_ident() {
+                    if y.nested.len() > 1 {
+                        return Err(SanitizerError(6));
+                    } else {
+                        if let Some(arg) = y.nested.last() {
+                            if let Some(y) = get_int_arg(arg) {
+                                return Ok(PathOrList::List(x.clone(), y));
+                            } else {
+                                return Err(SanitizerError(7));
+                            }
+                        } else {
+                            return Err(SanitizerError(6));
+                        }
+                    }
+                } else {
+                    Err(SanitizerError(4))
+                }
+            }
+            _ => Err(SanitizerError(4)),
+        },
         _ => Err(SanitizerError(4)),
+    }
+}
+
+pub fn get_int_arg(meta: &NestedMeta) -> Option<usize> {
+    match meta {
+        NestedMeta::Lit(x) => match x {
+            Lit::Int(y) => Some(y.base10_parse::<usize>().unwrap()),
+            _ => None,
+        },
+        _ => None,
     }
 }

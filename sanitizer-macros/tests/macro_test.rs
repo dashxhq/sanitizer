@@ -18,7 +18,11 @@ struct SanitizerTest {
     snake_case: String,
     #[sanitize(screaming_snake_case)]
     screaming_snake_case: String,
-    #[sanitize(trim, screaming_snake_case, numeric)]
+    #[sanitize(clamp_max(10))]
+    clamp_max: String,
+    #[sanitize(e164)]
+    phone_number: String,
+    #[sanitize(trim, screaming_snake_case)]
     multiple_sanitizers: String,
 }
 
@@ -33,17 +37,20 @@ fn sanitizer_check() {
         camel_case: String::from("hello_world"),
         snake_case: String::from("helloWorld"),
         screaming_snake_case: String::from("helloWorld"),
+        clamp_max: String::from("Hello, World"),
+        phone_number: String::from("+1 (454)"),
         multiple_sanitizers: String::from("    helloWorld123  "),
     };
     instance.sanitize();
     assert_eq!(instance.trim, "test");
-    assert_eq!(instance.numeric, "HelloWorld");
-    assert_eq!(instance.alphanumeric, ",&&");
+    assert_eq!(instance.numeric, "8130");
+    assert_eq!(instance.alphanumeric, "Hello藏World");
     assert_eq!(instance.lower_case, "hello, world");
     assert_eq!(instance.upper_case, "HELLO, WORLD");
     assert_eq!(instance.camel_case, "helloWorld");
     assert_eq!(instance.snake_case, "hello_world");
     assert_eq!(instance.screaming_snake_case, "HELLO_WORLD");
-    // TODO: Check if this is actually true, the _ at the end seems fishy
-    assert_eq!(instance.multiple_sanitizers, "HELLO_WORLD_");
+    assert_eq!(instance.clamp_max, "Hello, Wor");
+    assert_eq!(instance.phone_number, "+1454");
+    assert_eq!(instance.multiple_sanitizers, "HELLO_WORLD_123");
 }

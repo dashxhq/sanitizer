@@ -1,19 +1,39 @@
-use crate::sanitizer::{meta_list, SanitizerError};
+use crate::sanitizer::{meta_list, PathOrList, SanitizerError};
 use quote::{quote, TokenStreamExt};
 use syn::export::TokenStream2;
-use syn::{Ident, NestedMeta};
+use syn::NestedMeta;
+
+#[macro_use]
+macro_rules! sanitizer_with_arg {
+    ( $sanitizer : expr, $body : expr ) => {
+        if $sanitizer.has_args() {
+            $body
+        } else {
+            Err(SanitizerError::new(7))
+        }
+    };
+}
 
 // helper function to get the sanitizer function body
-pub fn sanitizer_function_body(sanitizer: &Ident) -> Result<TokenStream2, SanitizerError> {
+pub fn sanitizer_function_body(sanitizer: &PathOrList) -> Result<TokenStream2, SanitizerError> {
     match sanitizer.to_string().as_str() {
         "trim" => Ok(quote! { trim() }),
-        "numeric" => Ok(quote! { strip_numeric() }),
-        "alphanumeric" => Ok(quote! { strip_alphanumeric() }),
+        "numeric" => Ok(quote! { numeric() }),
+        "alphanumeric" => Ok(quote! { alphanumeric() }),
         "lower_case" => Ok(quote! { to_lowercase() }),
         "upper_case" => Ok(quote! { to_uppercase() }),
         "camel_case" => Ok(quote! { to_camelcase() }),
         "snake_case" => Ok(quote! { to_snakecase() }),
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
+        "e164" => Ok(quote! { e164() }),
+        "clamp_max" => {
+            sanitizer_with_arg!(sanitizer, {
+                let arg = sanitizer.get_args();
+                Ok(quote! {
+                    clamp_max(#arg)
+                })
+            })
+        }
         _ => Err(SanitizerError::new(5)),
     }
 }

@@ -16,7 +16,7 @@
 //!
 //! #[derive(Sanitize)]
 //! struct User {
-//! 	#[sanitize(trim, numeric)]
+//! 	#[sanitize(trim)]
 //! 	name: String,
 //! 	#[sanitize(trim, lower_case)]
 //! 	email: String
@@ -24,11 +24,11 @@
 //!
 //! fn main() {
 //! 	let mut instance = User {
-//! 		name: String::from("John Doe123"),
+//! 		name: String::from("   John Doe123 "),
 //! 		email: String::from(" JohnDoe123@email.com")
 //! 	};
 //! 	instance.sanitize();
-//! 	assert_eq!(instance.name, "John Doe");
+//! 	assert_eq!(instance.name, "John Doe123");
 //! 	assert_eq!(instance.email, "johndoe123@email.com");
 //! }
 //! ```

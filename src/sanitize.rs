@@ -1,6 +1,7 @@
 use inflector::cases::{
     camelcase::to_camel_case, screamingsnakecase::to_screaming_snake_case, snakecase::to_snake_case,
 };
+use phonenumber::{parse, Mode};
 use std::convert::From;
 
 /// The Sanitize trait generalises structs that are to be sanitized.
@@ -55,17 +56,17 @@ impl Sanitizer {
         self.content = self.content.trim().to_string();
         self
     }
-    /// Strip numeric characters from the string
-    pub fn strip_numeric(&mut self) -> &mut Self {
-        self.content = self.content.chars().filter(|b| !b.is_numeric()).collect();
+    /// Remove non numeric characters from the string
+    pub fn numeric(&mut self) -> &mut Self {
+        self.content = self.content.chars().filter(|b| b.is_numeric()).collect();
         self
     }
-    /// Strip alphanumeric characters from the string
-    pub fn strip_alphanumeric(&mut self) -> &mut Self {
+    /// Remove non alphanumeric characters from the string
+    pub fn alphanumeric(&mut self) -> &mut Self {
         self.content = self
             .content
             .chars()
-            .filter(|b| !b.is_alphanumeric())
+            .filter(|b| b.is_alphanumeric())
             .collect();
         self
     }
@@ -94,65 +95,108 @@ impl Sanitizer {
         self.content = to_screaming_snake_case(&self.content);
         self
     }
+    /// Set the maximum lenght of the content
+    pub fn clamp_max(&mut self, limit: usize) -> &mut Self {
+        self.content.truncate(limit);
+        self
+    }
+    /// Convert the phone number to the E164 International Standard
+    pub fn e164(&mut self) -> &mut Self {
+        let phone_number = parse(None, &self.content);
+        if let Ok(x) = phone_number {
+            self.content = x.format().mode(Mode::E164).to_string();
+        } else {
+            panic!("{:?}", "Not a valid phone number");
+        }
+        self
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
     #[test]
     fn trim() {
         let mut sanitize = Sanitizer::from(" Test   ");
         sanitize.trim();
         assert_eq!("Test", sanitize.get());
     }
+
     #[test]
     fn numeric() {
         let mut sanitize = Sanitizer::from("Test123445Test");
-        sanitize.strip_numeric();
-        assert_eq!("TestTest", sanitize.get());
+        sanitize.numeric();
+        assert_eq!("123445", sanitize.get());
     }
+
     #[test]
     fn alphanumeric() {
         let mut sanitize = Sanitizer::from("Hello,藏World&&");
-        sanitize.strip_alphanumeric();
-        assert_eq!(",&&", sanitize.get());
+        sanitize.alphanumeric();
+        assert_eq!("Hello藏World", sanitize.get());
     }
+
     #[test]
     fn lowercase() {
         let mut sanitize = Sanitizer::from("HELLO");
         sanitize.to_lowercase();
         assert_eq!("hello", sanitize.get());
     }
+
     #[test]
     fn uppercase() {
         let mut sanitize = Sanitizer::from("hello");
         sanitize.to_uppercase();
         assert_eq!("HELLO", sanitize.get());
     }
+
     #[test]
-    fn camecase() {
+    fn camelcase() {
         let mut sanitize = Sanitizer::from("some_string");
         sanitize.to_camelcase();
         assert_eq!("someString", sanitize.get());
     }
+
     #[test]
     fn snakecase() {
         let mut sanitize = Sanitizer::from("someString");
         sanitize.to_snakecase();
         assert_eq!("some_string", sanitize.get());
     }
+
     #[test]
     fn screaming_snakecase() {
         let mut sanitize = Sanitizer::from("someString");
         sanitize.to_screaming_snakecase();
         assert_eq!("SOME_STRING", sanitize.get());
     }
+
     #[test]
-    fn mulitple_lints() {
+    fn clamp_max() {
+        let mut sanitize = Sanitizer::from("someString");
+        sanitize.clamp_max(9);
+        assert_eq!("someStrin", sanitize.get());
+    }
+
+    #[test]
+    fn phone_number() {
+        let mut sanitize = Sanitizer::from("+1 (555) 555-1234");
+        sanitize.e164();
+        assert_eq!("+15555551234", sanitize.get());
+    }
+
+    #[test]
+    #[should_panic]
+    fn wrong_phone_number() {
+        let mut sanitize = Sanitizer::from("Not a Phone Number");
+        sanitize.e164();
+    }
+
+    #[test]
+    fn multiple_lints() {
         let mut sanitize = Sanitizer::from("    some_string12 ");
-        sanitize.trim();
-        sanitize.strip_numeric();
-        sanitize.to_camelcase();
-        assert_eq!("someString", sanitize.get());
+        sanitize.trim().numeric();
+        assert_eq!("12", sanitize.get());
     }
 }
