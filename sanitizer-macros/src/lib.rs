@@ -10,6 +10,7 @@ use quote::{quote, TokenStreamExt};
 use syn::export::TokenStream2;
 use syn::{parse_macro_input, DeriveInput};
 
+mod arg;
 mod codegen;
 mod sanitizer;
 mod type_ident;
@@ -41,18 +42,17 @@ mod type_ident;
 ///
 /// # Available sanitizers
 ///
-/// - **Trim**: Trims the string.
+/// - **trim**: Trims the string.
 /// - **numeric**: Remove numeric items from the string.
 /// - **alphanumeric**: Remove alphanumeric items from the string.
 /// - **lower_case**: Convert input to lower case.
 /// - **upper_case**: Convert input to upper case.
 /// - **camel_case**: Convert input to camel case.
 /// - **snake_case**: Convert input to snake case.
-/// - **e164**: Convert a valid phone number to the e164 international standard, panic if invalid phone number
-/// - **clamp(min, max)**: Limit an integer input to this region of min to max, for strings, cut it if it exceeds max
+/// - **e164**: Convert a valid phone number to the e164 international standard, panic if invalid phone number.
+/// - **clamp(min, max)**: Limit an integer input to this region of min to max.
+/// - **clamp(max)**: Cut the string if it exceeds max.
 /// - **screaming_snake_case**: Convert input to screaming snake case.
-///
-/// Right now, the macro only supports fields that have the type `String`
 #[proc_macro_derive(Sanitize, attributes(sanitize))]
 pub fn sanitize(input: TokenStream) -> TokenStream {
     let input_parsed = parse_macro_input!(input as DeriveInput);

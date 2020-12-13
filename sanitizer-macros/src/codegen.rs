@@ -1,10 +1,11 @@
+use crate::arg::{ArgBuilder, Args};
 use crate::sanitizer::SanitizerError;
 use crate::type_ident::TypeIdent;
 use quote::{quote, TokenStreamExt};
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use syn::export::{Span, TokenStream2};
-use syn::{Ident, Lit, LitInt, Meta, NestedMeta};
+use syn::export::TokenStream2;
+use syn::{Ident, Lit, Meta, NestedMeta};
 
 #[macro_use]
 macro_rules! sanitizer_with_arg {
@@ -22,10 +23,6 @@ pub enum PathOrList {
     List(Ident, Args),
 }
 
-pub struct Args {
-    pub args: Vec<String>,
-}
-
 // helper function to get the sanitizer function body
 pub fn sanitizer_function_body(
     sanitizer: &PathOrList,
@@ -36,8 +33,8 @@ pub fn sanitizer_function_body(
             "clamp" => {
                 sanitizer_with_arg!(sanitizer, {
                     if sanitizer.get_args().len() == 2 {
-                        let arg_one = LitInt::new(&sanitizer.get_args().args[0], Span::call_site());
-                        let arg_two = LitInt::new(&sanitizer.get_args().args[1], Span::call_site());
+                        let arg_one = ArgBuilder::int(sanitizer.get_args().args[0].as_str());
+                        let arg_two = ArgBuilder::int(sanitizer.get_args().args[1].as_str());
                         Ok(quote! {
                             clamp(#arg_one, #arg_two)
                         })
@@ -62,7 +59,7 @@ pub fn sanitizer_function_body(
             "clamp" => {
                 sanitizer_with_arg!(sanitizer, {
                     if sanitizer.get_args().len() == 1 {
-                        let arg_one = LitInt::new(&sanitizer.get_args().args[0], Span::call_site());
+                        let arg_one = ArgBuilder::int(&sanitizer.get_args().args[0]);
                         Ok(quote! {
                             cut(#arg_one)
                         })
@@ -165,15 +162,6 @@ impl PathOrList {
         } else {
             panic!("{:?}", "Arugment not found");
         }
-    }
-}
-
-impl Args {
-    pub fn len(&self) -> usize {
-        self.args.len()
-    }
-    pub fn new(args: Vec<String>) -> Self {
-        Self { args }
     }
 }
 
