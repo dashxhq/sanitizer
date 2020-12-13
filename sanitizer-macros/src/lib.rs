@@ -3,7 +3,8 @@
 //! Macros that allows seamless sanitizing
 //! on struct fields
 use crate::codegen::methods_layout;
-use crate::sanitizer::{parse_sanitizers, TypeOrNested};
+use crate::sanitizer::parse_sanitizers;
+use crate::type_ident::TypeOrNested;
 use proc_macro::TokenStream;
 use quote::{quote, TokenStreamExt};
 use syn::export::TokenStream2;
@@ -11,6 +12,7 @@ use syn::{parse_macro_input, DeriveInput};
 
 mod codegen;
 mod sanitizer;
+mod type_ident;
 
 /// The Sanitize derive macro implements the Sanitize trait for you.
 /// The trait only has a single associated function called `sanitize`
