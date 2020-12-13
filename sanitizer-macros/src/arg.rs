@@ -16,6 +16,8 @@ pub struct ArgBuilder;
 
 impl ArgBuilder {
     pub fn int(int: &str) -> LitInt {
-        LitInt::new(int, Span::call_site())
+        let mut owned = int.to_owned();
+        owned.retain(|c| !c.is_whitespace());
+        LitInt::new(&owned, Span::call_site())
     }
 }

@@ -85,6 +85,7 @@ impl StringSanitizer {
         }
         self
     }
+    /// Truncate the string with the given amount
     pub fn cut(&mut self, amount: usize) -> &mut Self {
         self.0.truncate(amount);
         self

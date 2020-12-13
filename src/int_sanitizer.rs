@@ -13,11 +13,14 @@
 /// ```
 ///
 pub struct IntSanitizer<T: PartialOrd + Copy>(T);
+
 // TODO: Remove Copy since its restrictive
 impl<T: PartialOrd + Copy> IntSanitizer<T> {
+    /// Make a new instance of the struct from the given T
     pub fn new(int: T) -> Self {
         Self(int)
     }
+    /// Consume the struct and return T
     pub fn get(self) -> T {
         self.0
     }
