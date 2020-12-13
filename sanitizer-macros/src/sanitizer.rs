@@ -1,73 +1,54 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use syn::{Data, Fields, FieldsNamed, Ident, Lit, Meta, NestedMeta, Type};
 
+static INT_TYPES: [&str; 10] = [
+    "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i63", "isize", "usize",
+];
 // SanitizerError is a custom error type that includes
 // info on why proc macro parsing for Sanitizer crate failed
 #[derive(Debug)]
 pub struct SanitizerError(u8);
 
-impl SanitizerError {
-    pub fn new(code: u8) -> Self {
-        Self(code)
+pub enum PathOrList {
+    Path(Ident),
+    List(Ident, Args),
+}
+
+pub struct Args {
+    pub args: Vec<String>,
+}
+
+impl Args {
+    pub fn len(&self) -> usize {
+        self.args.len()
+    }
+    pub fn new(args: Vec<String>) -> Self {
+        Self { args }
     }
 }
 
-pub enum PathOrList {
-    Path(Ident),
-    List(Ident, usize),
+#[derive(Clone, PartialOrd, Ord, PartialEq, Eq)]
+pub enum TypeOrNested {
+    // field, type
+    Type(Ident, Ident),
+    Nested(Ident, Ident),
 }
 
-impl PathOrList {
-    pub fn has_args(&self) -> bool {
-        if let Self::List(_, _) = self {
-            true
+impl TypeOrNested {
+    pub fn is_int(&self) -> bool {
+        if let Self::Type(_, x) = self {
+            check_if_valid_int(x.to_string())
         } else {
             false
         }
     }
-    pub fn get_args(&self) -> usize {
-        if let Self::List(_, x) = self {
-            *x
-        } else {
-            panic!("{:?}", "Arugment not found");
-        }
-    }
 }
-
-impl Display for PathOrList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        let y = match self {
-            Self::Path(x) => x.to_string(),
-            Self::List(x, _) => x.to_string(),
-        };
-        write!(f, "{}", y)
-    }
-}
-
-impl Display for SanitizerError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        let case = match self.0 {
-            0 => "Invalid field type, only std::string::String is allowed",
-            1 => "Struct cannot contain unnamed fields",
-            2 => "Please specify at least a single sanitizer",
-            3 => "Macro can be only applied on structs",
-            4 => "Macros that contain a structured meta list are allowed only",
-            5 => "Invalid sanitizer",
-            6 => "This sanitizer takes a single argument",
-            7 => "The argument can be only 64 bit int",
-            _ => "",
-        };
-        write!(f, "{}", case)
-    }
-}
-
-impl Error for SanitizerError {}
 
 // the type of map where we store the fields with the lints
-type FieldMap = HashMap<Ident, Vec<NestedMeta>>;
+type FieldMap = BTreeMap<TypeOrNested, Vec<NestedMeta>>;
 
 pub fn parse_sanitizers(data: Data) -> Result<FieldMap, SanitizerError> {
     let mut map: FieldMap = Default::default();
@@ -91,30 +72,39 @@ pub fn populate_map(
     for field in named_fields.named.iter() {
         let mut sanitizers = Vec::new();
         let field_type = field_type(field.clone().ty)?;
-        // make sure the field type is string only
-        if field_type == "String" {
-            // get the attributes over the field
-            for attr in field.attrs.iter() {
-                // parse the attribute
-                let meta = attr.parse_meta().unwrap();
-
-                match meta {
-                    // the attribute should be a list. for eg. sanitise(options)
-                    Meta::List(ref list) => {
+        let mut type_field = TypeOrNested::Type(field.clone().ident.unwrap(), field_type.clone());
+        // get the attributes over the field
+        for attr in field.attrs.iter() {
+            // parse the attribute
+            let meta = attr.parse_meta().unwrap();
+            let int = check_if_valid_int(field_type.to_string());
+            match meta {
+                // the attribute should be a list. for eg. sanitise(options)
+                Meta::List(ref list) => {
+                    // make sure the field type is string only
+                    if field_type == "String" || int {
                         if let Some(x) = list.path.get_ident() {
                             if x == "sanitize" {
                                 // get the sanitizers
                                 sanitizers.extend(list.nested.iter().cloned())
                             }
                         }
+                    } else {
+                        return Err(SanitizerError(0));
                     }
-                    _ => return Err(SanitizerError(4)),
                 }
+                Meta::Path(_) => {
+                    if field_type == "String" || int {
+                        return Err(SanitizerError(2));
+                    } else {
+                        type_field =
+                            TypeOrNested::Nested(field.clone().ident.unwrap(), field_type.clone())
+                    }
+                }
+                _ => return Err(SanitizerError(4)),
             }
-            map.insert(field.clone().ident.unwrap(), sanitizers);
-        } else {
-            return Err(SanitizerError(0));
         }
+        map.insert(type_field, sanitizers);
     }
     Ok(map.clone())
 }
@@ -147,19 +137,15 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
             }
             Meta::List(y) => {
                 if let Some(x) = y.path.get_ident() {
-                    if y.nested.len() > 1 {
-                        return Err(SanitizerError(6));
-                    } else {
-                        if let Some(arg) = y.nested.last() {
-                            if let Some(y) = get_int_arg(arg) {
-                                return Ok(PathOrList::List(x.clone(), y));
-                            } else {
-                                return Err(SanitizerError(7));
-                            }
+                    let mut vec = Vec::new();
+                    for args in y.nested.clone() {
+                        if let Some(x) = get_int_arg(&args) {
+                            vec.push(x);
                         } else {
-                            return Err(SanitizerError(6));
+                            return Err(SanitizerError(7));
                         }
                     }
+                    return Ok(PathOrList::List(x.clone(), Args::new(vec)));
                 } else {
                     Err(SanitizerError(4))
                 }
@@ -170,12 +156,68 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
     }
 }
 
-pub fn get_int_arg(meta: &NestedMeta) -> Option<usize> {
+pub fn get_int_arg(meta: &NestedMeta) -> Option<String> {
     match meta {
         NestedMeta::Lit(x) => match x {
-            Lit::Int(y) => Some(y.base10_parse::<usize>().unwrap()),
+            Lit::Int(y) => Some(y.to_string()),
             _ => None,
         },
         _ => None,
     }
 }
+
+pub fn check_if_valid_int(int_type: String) -> bool {
+    INT_TYPES.contains(&int_type.as_str())
+}
+
+impl PathOrList {
+    pub fn has_args(&self) -> bool {
+        if let Self::List(_, _) = self {
+            true
+        } else {
+            false
+        }
+    }
+    pub fn get_args(&self) -> &Args {
+        if let Self::List(_, x) = self {
+            x
+        } else {
+            panic!("{:?}", "Arugment not found");
+        }
+    }
+}
+
+impl SanitizerError {
+    pub fn new(code: u8) -> Self {
+        Self(code)
+    }
+}
+
+impl Display for PathOrList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        let y = match self {
+            Self::Path(x) => x.to_string(),
+            Self::List(x, _) => x.to_string(),
+        };
+        write!(f, "{}", y)
+    }
+}
+
+impl Display for SanitizerError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        let case = match self.0 {
+            0 => "Invalid field type, only std::string::String is allowed",
+            1 => "Struct cannot contain unnamed fields",
+            2 => "Please specify at least a single sanitizer",
+            3 => "Macro can be only applied on structs",
+            4 => "Macros that contain a structured meta list are allowed only",
+            5 => "Invalid sanitizer",
+            6 => "Wrong number of arguments",
+            7 => "The argument can be only 64 bit int",
+            _ => "",
+        };
+        write!(f, "{}", case)
+    }
+}
+
+impl Error for SanitizerError {}

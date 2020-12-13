@@ -3,7 +3,7 @@
 //! Macros that allows seamless sanitizing
 //! on struct fields
 use crate::codegen::methods_layout;
-use crate::sanitizer::parse_sanitizers;
+use crate::sanitizer::{parse_sanitizers, TypeOrNested};
 use proc_macro::TokenStream;
 use quote::{quote, TokenStreamExt};
 use syn::export::TokenStream2;
@@ -20,7 +20,7 @@ mod sanitizer;
 /// # Example
 ///
 /// ```
-/// use sanitizer_macros::Sanitize;
+/// use sanitizer::prelude::*;
 ///
 /// #[derive(Sanitize)]
 /// struct User {
@@ -46,6 +46,8 @@ mod sanitizer;
 /// - **upper_case**: Convert input to upper case.
 /// - **camel_case**: Convert input to camel case.
 /// - **snake_case**: Convert input to snake case.
+/// - **e164**: Convert a valid phone number to the e164 international standard, panic if invalid phone number
+/// - **clamp(min, max)**: Limit an integer input to this region of min to max, for strings, cut it if it exceeds max
 /// - **screaming_snake_case**: Convert input to screaming snake case.
 ///
 /// Right now, the macro only supports fields that have the type `String`
@@ -58,11 +60,38 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     if let Ok(ref val) = parsed {
         inner_body.append_all(val.iter().map(|r| {
             let field = r.0;
-            let layout = methods_layout(r.1);
+            let mut call = quote! {};
+            let mut init = quote! {};
+            let mut layout = quote! {};
+            match field {
+                TypeOrNested::Type(x, y) => {
+                    layout = methods_layout(r.1, y.clone());
+                    if !field.is_int() {
+                        call.append_all(quote! {
+                            self.#x = instance.get();
+                        });
+                        init.append_all(quote! {
+                            let mut instance = StringSanitizer::from(self.#x.as_str());
+                        })
+                    } else {
+                        call.append_all(quote! {
+                            self.#x = instance.get();
+                        });
+                        init.append_all(quote! {
+                            let mut instance = IntSanitizer::new(self.#x);
+                        })
+                    }
+                }
+                TypeOrNested::Nested(x, y) => call.append_all({
+                    quote! {
+                        <#y as Sanitize>::sanitize(&mut self.#x);
+                    }
+                }),
+            }
             quote! {
-                let mut instance = Sanitizer::from(self.#field.as_str());
+                #init
                 #layout
-                self.#field = instance.get();
+                #call
             }
         }));
     } else {
@@ -70,9 +99,8 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
         inner_body = quote! { compile_error!(#err) };
     }
     let final_body = quote! {
-        use sanitizer::{Sanitize, Sanitizer};
 
-        impl Sanitize for #name {
+        impl sanitizer::Sanitize for #name {
             fn sanitize(&mut self) {
                 #inner_body
             }

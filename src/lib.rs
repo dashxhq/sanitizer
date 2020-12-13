@@ -12,7 +12,7 @@
 //! now is to call the sanitize method on the trait
 //!
 //! ```
-//! use sanitizer_macros::Sanitize;
+//! use sanitizer::prelude::*;
 //!
 //! #[derive(Sanitize)]
 //! struct User {
@@ -33,6 +33,18 @@
 //! }
 //! ```
 //! To see a list of available sanitizers, check the [sanitizer-macros crate](../sanitizer_macros/derive.Sanitize.html)
-mod sanitize;
+mod int_sanitizer;
+mod string_sanitizer;
 
-pub use crate::sanitize::{Sanitize, Sanitizer};
+/// The Sanitize trait generalises structs that are to be sanitized.
+pub trait Sanitize {
+    /// Call this associated method when sanitizing the structs.
+    fn sanitize(&mut self);
+}
+
+pub mod prelude {
+    pub use crate::int_sanitizer::IntSanitizer;
+    pub use crate::string_sanitizer::StringSanitizer;
+    pub use crate::Sanitize;
+    pub use sanitizer_macros::Sanitize;
+}
