@@ -111,4 +111,4 @@ if you would like to individually snaitize `OtherInfo` then you can just call `s
 
 # LICENSE
 
-MIT
+dashxhq/sanitizer is licensed under the MIT License.
