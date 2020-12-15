@@ -46,5 +46,6 @@ pub mod prelude {
     pub use crate::int_sanitizer::IntSanitizer;
     pub use crate::string_sanitizer::StringSanitizer;
     pub use crate::Sanitize;
+    #[cfg(feature = "derive")]
     pub use sanitizer_macros::Sanitize;
 }
