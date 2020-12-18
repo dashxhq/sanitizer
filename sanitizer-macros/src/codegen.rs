@@ -1,22 +1,12 @@
-use crate::arg::{ArgBuilder, Args};
+use crate::arg::Args;
 use crate::sanitizer::SanitizerError;
+use crate::sanitizers::*;
 use crate::type_ident::TypeIdent;
 use quote::{quote, TokenStreamExt};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use syn::export::TokenStream2;
 use syn::{Ident, Lit, Meta, NestedMeta};
-
-#[macro_use]
-macro_rules! sanitizer_with_arg {
-    ( $sanitizer : expr, $body : expr ) => {
-        if $sanitizer.has_args() {
-            $body
-        } else {
-            Err(SanitizerError::new(7))
-        }
-    };
-}
 
 pub enum PathOrList {
     Path(Ident),
@@ -29,47 +19,9 @@ pub fn sanitizer_function_body(
     type_of_field: TypeIdent,
 ) -> Result<TokenStream2, SanitizerError> {
     if type_of_field.is_int() {
-        match sanitizer.to_string().as_str() {
-            "clamp" => {
-                sanitizer_with_arg!(sanitizer, {
-                    if sanitizer.get_args().len() == 2 {
-                        let arg_one = ArgBuilder::int(sanitizer.get_args().args[0].as_str());
-                        let arg_two = ArgBuilder::int(sanitizer.get_args().args[1].as_str());
-                        Ok(quote! {
-                            clamp(#arg_one, #arg_two)
-                        })
-                    } else {
-                        Err(SanitizerError::new(6))
-                    }
-                })
-            }
-            _ => Err(SanitizerError::new(5)),
-        }
+        int::get_int_sanitizers(sanitizer)
     } else if type_of_field.is_string() {
-        match sanitizer.to_string().as_str() {
-            "trim" => Ok(quote! { trim() }),
-            "numeric" => Ok(quote! { numeric() }),
-            "alphanumeric" => Ok(quote! { alphanumeric() }),
-            "lower_case" => Ok(quote! { to_lowercase() }),
-            "upper_case" => Ok(quote! { to_uppercase() }),
-            "camel_case" => Ok(quote! { to_camelcase() }),
-            "snake_case" => Ok(quote! { to_snakecase() }),
-            "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
-            "e164" => Ok(quote! { e164() }),
-            "clamp" => {
-                sanitizer_with_arg!(sanitizer, {
-                    if sanitizer.get_args().len() == 1 {
-                        let arg_one = ArgBuilder::int(&sanitizer.get_args().args[0]);
-                        Ok(quote! {
-                            cut(#arg_one)
-                        })
-                    } else {
-                        Err(SanitizerError::new(6))
-                    }
-                })
-            }
-            _ => Err(SanitizerError::new(5)),
-        }
+        string::get_string_sanitizers(sanitizer)
     } else {
         Err(SanitizerError::new(0))
     }
