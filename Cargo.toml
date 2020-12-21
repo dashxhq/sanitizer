@@ -1,7 +1,11 @@
 [package]
 name = "sanitizer"
+description = "A collection of methods and macros to sanitize struct fields"
+keywords = ["sanitizer", "sanitize", "validation", "validator", "validate", "trim", "e164", "cap", "case"]
+categories = ["text-processing", "value-formatting"]
 version = "0.1.0"
-authors = ["weegee <somilsharma627@gmail.com>"]
+authors = ["weegee <dakshupadhyay991@gmail.com>"]
+license = "MIT"
 edition = "2018"
 
 [dependencies]
