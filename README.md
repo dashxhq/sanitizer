@@ -39,6 +39,24 @@ fn main() {
 }
 ```
 
+If you do not want to use the derive macro, then the sanitizer crate provides structures and methods for sanitizing
+ints
+
+```rust
+let int: u8 = 50;
+let mut instance = IntSanitizer::new(int);
+instance.clamp(99, 101);
+assert_eq!(99, instance.get());
+```
+
+and strings
+
+```rust
+let mut sanitize = StringSanitizer::from("    some_string12 ");
+sanitize.trim().numeric();
+assert_eq!("12", sanitize.get());
+```
+
 # Sanitizers
 
 ### trim
