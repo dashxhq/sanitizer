@@ -10,9 +10,15 @@ use quote::{quote, TokenStreamExt};
 use syn::export::TokenStream2;
 use syn::{parse_macro_input, DeriveInput};
 
+// argument parsing and storing
 mod arg;
+// code gen here
 mod codegen;
+// parsing for struct fields
 mod sanitizer;
+// sanitizers are here
+mod sanitizers;
+// types and stuff
 mod type_ident;
 
 /// The Sanitize derive macro implements the Sanitize trait for you.
@@ -69,20 +75,17 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                 TypeOrNested::Type(x, y) => {
                     layout = methods_layout(r.1, y.clone());
                     if !field.is_int() {
-                        call.append_all(quote! {
-                            self.#x = instance.get();
-                        });
                         init.append_all(quote! {
                             let mut instance = StringSanitizer::from(self.#x.as_str());
                         })
                     } else {
-                        call.append_all(quote! {
-                            self.#x = instance.get();
-                        });
                         init.append_all(quote! {
                             let mut instance = IntSanitizer::new(self.#x);
                         })
                     }
+                    call.append_all(quote! {
+                        self.#x = instance.get();
+                    });
                 }
                 TypeOrNested::Nested(x, y) => call.append_all({
                     quote! {
