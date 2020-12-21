@@ -5,7 +5,7 @@ edition = "2018"
 authors = ["weegee <dakshupadhyay991@gmail.com>"]
 license = "MIT"
 description = "Derive macro for the sanitizer crate"
-keywords = ["sanitizer macro", "macro"]
+keywords = ["sanitizer-macro", "macro"]
 
 [lib]
 proc-macro = true
