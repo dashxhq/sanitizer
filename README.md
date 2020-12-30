@@ -103,6 +103,34 @@ Limit an valid integer field with the given min and max.
 
 Limit a string input length to the following number
 
+### custom(function)
+
+Use a custom function to sanitize a field differently. For example
+
+```rust
+
+#[derive(Sanitize)]
+struct SanitizerTest {
+    #[sanitize(custom(func_string))]
+    field_string: String,
+}
+
+fn func_string(field: &str) -> String {
+    let mut sanitizer = StringSanitizer::from(field);
+    sanitizer.trim();
+    sanitizer.get()
+}
+
+#[test]
+fn sanitizer_check_custom_functions() {
+    let mut instance = SanitizerTest {
+        field_string: String::from("Hello    "),
+    };
+    instance.sanitize();
+    assert_eq!(instance.field_string, String::from("Hello"));
+}
+```
+
 ### nesting
 
 ```rust
