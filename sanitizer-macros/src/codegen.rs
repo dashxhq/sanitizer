@@ -31,9 +31,8 @@ pub fn methods_layout(list: &Vec<NestedMeta>, type_of_field: TypeIdent) -> Token
     let mut methods = quote! {};
 
     methods.append_all(list.iter().map(|e| {
-        let err_msg = SanitizerError::new(5).to_string();
-
-        if let Ok(meta) = meta_list(e) {
+        let list = meta_list(e);
+        if let Ok(meta) = list {
             let res_body = sanitizer_function_body(&meta, type_of_field.clone());
             if let Ok(body) = res_body {
                 quote! {
@@ -50,8 +49,9 @@ pub fn methods_layout(list: &Vec<NestedMeta>, type_of_field: TypeIdent) -> Token
                 }
             }
         } else {
+            let err = list.err().unwrap().to_string();
             quote! {
-                compile_error!(#err_msg);
+                compile_error!(#err);
             }
         }
     }));
@@ -73,7 +73,7 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
                 if let Some(x) = y.path.get_ident() {
                     let mut vec = Vec::new();
                     for args in y.nested.clone() {
-                        if let Some(x) = get_int_arg(&args) {
+                        if let Some(x) = get_first_arg(&args) {
                             vec.push(x);
                         } else {
                             return Err(SanitizerError::new(7));
@@ -90,13 +90,16 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
     }
 }
 
-pub fn get_int_arg(meta: &NestedMeta) -> Option<String> {
+pub fn get_first_arg(meta: &NestedMeta) -> Option<String> {
     match meta {
         NestedMeta::Lit(x) => match x {
             Lit::Int(y) => Some(y.to_string()),
             _ => None,
         },
-        _ => None,
+        NestedMeta::Meta(x) => match x {
+            Meta::Path(y) => Some(y.segments.last().unwrap().ident.to_string()),
+            _ => None,
+        },
     }
 }
 

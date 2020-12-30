@@ -30,6 +30,14 @@ impl<T: PartialOrd + Copy> IntSanitizer<T> {
         self.0 = num_traits::clamp(self.0, min, max);
         self
     }
+    /// Call a custom function for sanitizing the value of type T
+    pub fn call<F>(&mut self, func: F) -> &mut Self
+    where
+        F: FnOnce(T) -> T,
+    {
+        self.0 = func(self.0);
+        self
+    }
 }
 
 #[cfg(test)]

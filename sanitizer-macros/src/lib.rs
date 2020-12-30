@@ -34,15 +34,27 @@ mod type_ident;
 /// #[derive(Sanitize)]
 /// struct User {
 ///    #[sanitize(trim)]
-///    name: String
+///    name: String,
+///    #[sanitize(custom(eight))]
+///    acc_no: u8
+/// }
+///
+/// fn eight(mut acc_no: u8) -> u8 {
+///     if acc_no != 8 {
+///         acc_no = 8;
+///
+///     }
+///     acc_no
 /// }
 ///
 /// fn main() {
 /// 	let mut instance = User {
-/// 		name: String::from("John, Doe ")
+/// 		name: String::from("John, Doe "),
+///         acc_no: 10
 /// 	};
 /// 	instance.sanitize();
 /// 	assert_eq!(instance.name, "John, Doe");
+///     assert_eq!(instance.acc_no, 8);
 /// }
 /// ```
 ///
@@ -59,6 +71,8 @@ mod type_ident;
 /// - **clamp(min, max)**: Limit an integer input to this region of min to max.
 /// - **clamp(max)**: Cut the string if it exceeds max.
 /// - **screaming_snake_case**: Convert input to screaming snake case.
+/// - **custom(function)**: A custom function that is called to sanitize a field
+/// according to any other way.
 #[proc_macro_derive(Sanitize, attributes(sanitize))]
 pub fn sanitize(input: TokenStream) -> TokenStream {
     let input_parsed = parse_macro_input!(input as DeriveInput);

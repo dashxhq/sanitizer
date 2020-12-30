@@ -47,19 +47,17 @@ pub fn populate_map(
                 // the attribute should be a list. for eg. sanitise(options)
                 Meta::List(ref list) => {
                     // make sure the field type is string only
-                    if field_type.is_string() || field_type.is_int() {
-                        if let Some(x) = list.path.get_ident() {
-                            if x == "sanitize" {
-                                // get the sanitizers
-                                sanitizers.extend(list.nested.iter().cloned())
-                            }
+                    if field_type.is_string_or_int() {
+                        if attr.path.is_ident("sanitize") {
+                            // get the sanitizers
+                            sanitizers.extend(list.nested.iter().cloned())
                         }
                     } else {
                         return Err(SanitizerError::new(0));
                     }
                 }
                 Meta::Path(_) => {
-                    if field_type.is_string() || field_type.is_int() {
+                    if field_type.is_string_or_int() {
                         return Err(SanitizerError::new(2));
                     } else {
                         type_field =
