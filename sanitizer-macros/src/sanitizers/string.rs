@@ -38,6 +38,18 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, San
                 }
             })
         }
+        "custom" => {
+            sanitizer_with_arg!(sanitizer, {
+                if sanitizer.get_args().len() == 1 {
+                    let arg_one = ArgBuilder::ident(sanitizer.get_args().args[0].as_str());
+                    Ok(quote! {
+                        call(#arg_one)
+                    })
+                } else {
+                    Err(SanitizerError::new(6))
+                }
+            })
+        }
         _ => Err(SanitizerError::new(5)),
     }
 }

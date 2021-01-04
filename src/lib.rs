@@ -1,7 +1,8 @@
 #![allow(clippy::all)]
 #![forbid(unsafe_code)]
 //! The Sanitizer crate helps in sanitizing structured data
-//! by providing macros.
+//! by providing [macros](https://docs.rs/sanitizer_macros/0.1.0/sanitizer_macros/derive.Sanitize.html) and data structures to perform sanitization on
+//! fields.
 //!
 //! # Basic usage
 //!
@@ -32,7 +33,7 @@
 //! 	assert_eq!(instance.email, "johndoe123@email.com");
 //! }
 //! ```
-//! To see a list of available sanitizers, check the [sanitizer-macros crate](../sanitizer_macros/derive.Sanitize.html)
+//! To see a list of available sanitizers, check the [sanitizer-macros crate](https://docs.rs/sanitizer_macros/0.1.0/sanitizer_macros/derive.Sanitize.html)
 mod int_sanitizer;
 mod string_sanitizer;
 
@@ -41,7 +42,12 @@ pub trait Sanitize {
     /// Call this associated method when sanitizing the structs.
     fn sanitize(&mut self);
 }
+/// Sanitizer methods for ints
+pub use crate::int_sanitizer::IntSanitizer;
+/// Sanitizer methods for strings
+pub use crate::string_sanitizer::StringSanitizer;
 
+/// Bring all the sanitizers, the derive macro, and the Sanitize trait in scope
 pub mod prelude {
     pub use crate::int_sanitizer::IntSanitizer;
     pub use crate::string_sanitizer::StringSanitizer;

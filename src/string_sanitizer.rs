@@ -90,6 +90,14 @@ impl StringSanitizer {
         self.0.truncate(amount);
         self
     }
+    /// Call a custom function for sanitizing the string
+    pub fn call<F>(&mut self, func: F) -> &mut Self
+    where
+        F: FnOnce(&str) -> String,
+    {
+        self.0 = func(&self.0);
+        self
+    }
 }
 
 impl From<String> for StringSanitizer {

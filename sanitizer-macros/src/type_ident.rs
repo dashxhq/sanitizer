@@ -39,6 +39,9 @@ impl TypeIdent {
     pub fn is_int(&self) -> bool {
         self.is_int
     }
+    pub fn is_string_or_int(&self) -> bool {
+        self.is_int || self.ident == "String"
+    }
     pub fn ident(&self) -> Ident {
         self.ident.clone()
     }

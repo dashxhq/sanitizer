@@ -39,6 +39,24 @@ fn main() {
 }
 ```
 
+If you do not want to use the derive macro, then the sanitizer crate provides structures and methods for sanitizing
+ints
+
+```rust
+let int: u8 = 50;
+let mut instance = IntSanitizer::new(int);
+instance.clamp(99, 101);
+assert_eq!(99, instance.get());
+```
+
+and strings
+
+```rust
+let mut sanitize = StringSanitizer::from("    some_string12 ");
+sanitize.trim().numeric();
+assert_eq!("12", sanitize.get());
+```
+
 # Sanitizers
 
 ### trim
@@ -84,6 +102,34 @@ Limit an valid integer field with the given min and max.
 ### clamp(max)
 
 Limit a string input length to the following number
+
+### custom(function)
+
+Use a custom function to sanitize a field differently. For example
+
+```rust
+
+#[derive(Sanitize)]
+struct SanitizerTest {
+    #[sanitize(custom(func_string))]
+    field_string: String,
+}
+
+fn func_string(field: &str) -> String {
+    let mut sanitizer = StringSanitizer::from(field);
+    sanitizer.trim();
+    sanitizer.get()
+}
+
+#[test]
+fn sanitizer_check_custom_functions() {
+    let mut instance = SanitizerTest {
+        field_string: String::from("Hello    "),
+    };
+    instance.sanitize();
+    assert_eq!(instance.field_string, String::from("Hello"));
+}
+```
 
 ### nesting
 
