@@ -94,7 +94,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                         })
                     } else {
                         init.append_all(quote! {
-                            let mut instance = IntSanitizer::new(self.#x);
+                            let mut instance = IntSanitizer::from(self.#x);
                         })
                     }
                     call.append_all(quote! {

@@ -9,7 +9,7 @@ struct SanitizerTest {
 }
 
 fn func_int(field: u8) -> u8 {
-    let mut sanitizer = IntSanitizer::new(field);
+    let mut sanitizer = IntSanitizer::from(field);
     sanitizer.clamp(0, 5);
     sanitizer.get()
 }
