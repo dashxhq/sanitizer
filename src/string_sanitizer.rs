@@ -1,7 +1,4 @@
-use inflector::cases::{
-    camelcase::to_camel_case, screamingsnakecase::to_screaming_snake_case, snakecase::to_snake_case,
-};
-
+use heck::*;
 use phonenumber::{parse, Mode};
 use std::convert::From;
 
@@ -57,18 +54,23 @@ impl StringSanitizer {
         self
     }
     /// Convert string to camel case
-    pub fn to_camelcase(&mut self) -> &mut Self {
-        self.0 = to_camel_case(&self.0);
+    pub fn to_camel_case(&mut self) -> &mut Self {
+        let s = self.0.to_camel_case();
+        let mut c = s.chars();
+        self.0 = match c.next() {
+            None => String::new(),
+            Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
+        };
         self
     }
     /// Convert string to snake case
-    pub fn to_snakecase(&mut self) -> &mut Self {
-        self.0 = to_snake_case(&self.0);
+    pub fn to_snake_case(&mut self) -> &mut Self {
+        self.0 = self.0.to_snake_case();
         self
     }
     /// Convert string to screaming snake case
     pub fn to_screaming_snakecase(&mut self) -> &mut Self {
-        self.0 = to_screaming_snake_case(&self.0);
+        self.0 = self.0.to_shouty_snake_case();
         self
     }
     /// Set the maximum lenght of the content
@@ -136,8 +138,8 @@ mod test {
     string_test!(alphanumeric, "Hello,藏World&&" => "Hello藏World");
     string_test!(to_lowercase, "HELLO" => "hello");
     string_test!(to_uppercase, "hello" => "HELLO");
-    string_test!(to_camelcase, "some_string" => "someString");
-    string_test!(to_snakecase, "someString" => "some_string");
+    string_test!(to_camel_case, "some_string" => "someString");
+    string_test!(to_snake_case, "someString" => "some_string");
     string_test!(to_screaming_snakecase, "someString" => "SOME_STRING");
     string_test!(e164, "+1 (555) 555-1234" => "+15555551234");
 

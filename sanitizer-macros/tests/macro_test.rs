@@ -56,5 +56,5 @@ fn sanitizer_check() {
     assert_eq!(instance.clamp_str, "Hello, Wor");
     assert_eq!(instance.clamp_int, 10);
     assert_eq!(instance.phone_number, "+1454");
-    assert_eq!(instance.multiple_sanitizers, "HELLO_WORLD_123");
+    assert_eq!(instance.multiple_sanitizers, "HELLO_WORLD123");
 }
