@@ -22,8 +22,8 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, San
         "alphanumeric" => Ok(quote! { alphanumeric() }),
         "lower_case" => Ok(quote! { to_lowercase() }),
         "upper_case" => Ok(quote! { to_uppercase() }),
-        "camel_case" => Ok(quote! { to_camelcase() }),
-        "snake_case" => Ok(quote! { to_snakecase() }),
+        "camel_case" => Ok(quote! { to_camel_case() }),
+        "snake_case" => Ok(quote! { to_snake_case() }),
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
         "e164" => Ok(quote! { e164() }),
         "clamp" => {

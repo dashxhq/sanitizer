@@ -44,7 +44,7 @@ ints
 
 ```rust
 let int: u8 = 50;
-let mut instance = IntSanitizer::new(int);
+let mut instance = IntSanitizer::from(int);
 instance.clamp(99, 101);
 assert_eq!(99, instance.get());
 ```

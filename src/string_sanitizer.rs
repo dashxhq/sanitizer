@@ -1,6 +1,4 @@
-use inflector::cases::{
-    camelcase::to_camel_case, screamingsnakecase::to_screaming_snake_case, snakecase::to_snake_case,
-};
+use heck::*;
 use phonenumber::{parse, Mode};
 use std::convert::From;
 
@@ -56,18 +54,23 @@ impl StringSanitizer {
         self
     }
     /// Convert string to camel case
-    pub fn to_camelcase(&mut self) -> &mut Self {
-        self.0 = to_camel_case(&self.0);
+    pub fn to_camel_case(&mut self) -> &mut Self {
+        let s = self.0.to_camel_case();
+        let mut c = s.chars();
+        self.0 = match c.next() {
+            None => String::new(),
+            Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
+        };
         self
     }
     /// Convert string to snake case
-    pub fn to_snakecase(&mut self) -> &mut Self {
-        self.0 = to_snake_case(&self.0);
+    pub fn to_snake_case(&mut self) -> &mut Self {
+        self.0 = self.0.to_snake_case();
         self
     }
     /// Convert string to screaming snake case
     pub fn to_screaming_snakecase(&mut self) -> &mut Self {
-        self.0 = to_screaming_snake_case(&self.0);
+        self.0 = self.0.to_shouty_snake_case();
         self
     }
     /// Set the maximum lenght of the content
@@ -108,7 +111,7 @@ impl From<String> for StringSanitizer {
 
 impl From<&str> for StringSanitizer {
     fn from(content: &str) -> Self {
-        Self::new(content.to_string())
+        Self::new(content.to_owned())
     }
 }
 
@@ -116,74 +119,35 @@ impl From<&str> for StringSanitizer {
 mod test {
     use super::*;
 
-    #[test]
-    fn trim() {
-        let mut sanitize = StringSanitizer::from(" Test   ");
-        sanitize.trim();
-        assert_eq!("Test", sanitize.get());
+    #[macro_use]
+    macro_rules! string_test {
+        ( $sanitizer : ident, $from : expr => $to : expr ) => {
+            paste::paste! {
+                #[test]
+                fn [<$sanitizer>]() {
+                    let mut sanitize = StringSanitizer::from($from);
+                    sanitize.$sanitizer();
+                    assert_eq!($to, sanitize.get());
+                }
+            }
+        };
     }
 
-    #[test]
-    fn numeric() {
-        let mut sanitize = StringSanitizer::from("Test123445Test");
-        sanitize.numeric();
-        assert_eq!("123445", sanitize.get());
-    }
-
-    #[test]
-    fn alphanumeric() {
-        let mut sanitize = StringSanitizer::from("Hello,藏World&&");
-        sanitize.alphanumeric();
-        assert_eq!("Hello藏World", sanitize.get());
-    }
-
-    #[test]
-    fn lowercase() {
-        let mut sanitize = StringSanitizer::from("HELLO");
-        sanitize.to_lowercase();
-        assert_eq!("hello", sanitize.get());
-    }
-
-    #[test]
-    fn uppercase() {
-        let mut sanitize = StringSanitizer::from("hello");
-        sanitize.to_uppercase();
-        assert_eq!("HELLO", sanitize.get());
-    }
-
-    #[test]
-    fn camelcase() {
-        let mut sanitize = StringSanitizer::from("some_string");
-        sanitize.to_camelcase();
-        assert_eq!("someString", sanitize.get());
-    }
-
-    #[test]
-    fn snakecase() {
-        let mut sanitize = StringSanitizer::from("someString");
-        sanitize.to_snakecase();
-        assert_eq!("some_string", sanitize.get());
-    }
-
-    #[test]
-    fn screaming_snakecase() {
-        let mut sanitize = StringSanitizer::from("someString");
-        sanitize.to_screaming_snakecase();
-        assert_eq!("SOME_STRING", sanitize.get());
-    }
+    string_test!(trim, " Test   " => "Test");
+    string_test!(numeric, "Test123445Test" => "123445");
+    string_test!(alphanumeric, "Hello,藏World&&" => "Hello藏World");
+    string_test!(to_lowercase, "HELLO" => "hello");
+    string_test!(to_uppercase, "hello" => "HELLO");
+    string_test!(to_camel_case, "some_string" => "someString");
+    string_test!(to_snake_case, "someString" => "some_string");
+    string_test!(to_screaming_snakecase, "someString" => "SOME_STRING");
+    string_test!(e164, "+1 (555) 555-1234" => "+15555551234");
 
     #[test]
     fn clamp_max() {
         let mut sanitize = StringSanitizer::from("someString");
         sanitize.clamp_max(9);
         assert_eq!("someStrin", sanitize.get());
-    }
-
-    #[test]
-    fn phone_number() {
-        let mut sanitize = StringSanitizer::from("+1 (555) 555-1234");
-        sanitize.e164();
-        assert_eq!("+15555551234", sanitize.get());
     }
 
     #[test]
