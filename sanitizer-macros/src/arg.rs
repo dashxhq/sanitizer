@@ -1,4 +1,5 @@
-use syn::{export::Span, Ident, LitInt};
+use proc_macro2::Span;
+use syn::{Ident, LitInt};
 
 pub struct Args {
     pub args: Vec<String>,
