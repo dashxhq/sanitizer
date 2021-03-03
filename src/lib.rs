@@ -37,9 +37,9 @@
 mod int_sanitizer;
 mod string_sanitizer;
 
-/// The Sanitize trait generalises structs that are to be sanitized.
+/// The Sanitize trait generalises types that are to be sanitized.
 pub trait Sanitize {
-    /// Call this associated method when sanitizing the structs.
+    /// Call this associated method when sanitizing.
     fn sanitize(&mut self);
 }
 /// Sanitizer methods for ints

@@ -16,6 +16,20 @@ struct OtherInfo {
     email: String,
 }
 
+#[derive(Sanitize)]
+enum FirstEnum {
+    #[sanitize]
+    Test(OtherEnum),
+    None,
+}
+
+#[derive(Sanitize)]
+enum OtherEnum {
+    #[sanitize(trim)]
+    Test(String),
+    None,
+}
+
 impl OtherInfo {
     pub fn new() -> Self {
         Self {
@@ -44,4 +58,29 @@ fn second_nesting_instance() {
     other_info.sanitize();
     assert_eq!(other_info.id, "123984");
     assert_eq!(other_info.email, "test@gmail.com");
+}
+
+#[test]
+fn first_instance_enum() {
+    let other_info = OtherEnum::Test(String::from(" hello"));
+    let mut first_instance = FirstEnum::Test(other_info);
+    first_instance.sanitize();
+    match first_instance {
+        FirstEnum::Test(x) => {
+            if let OtherEnum::Test(y) = x {
+                assert_eq!(y, String::from("hello"))
+            }
+        }
+        _ => panic!(),
+    }
+}
+
+#[test]
+fn second_nesting_instance_enum() {
+    let mut other_info = OtherEnum::Test(String::from(" hello"));
+
+    other_info.sanitize();
+    if let OtherEnum::Test(y) = other_info {
+        assert_eq!(y, String::from("hello"))
+    }
 }

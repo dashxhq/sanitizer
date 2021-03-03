@@ -1,12 +1,14 @@
 use crate::arg::Args;
 use crate::sanitizer::SanitizerError;
 use crate::sanitizers::*;
-use crate::type_ident::TypeIdent;
+use crate::type_ident::{TypeIdent, TypeOrNested};
+use proc_macro2::Ident;
+use syn::export::TokenStream2;
+
 use quote::{quote, TokenStreamExt};
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use syn::export::TokenStream2;
-use syn::{Ident, Lit, Meta, NestedMeta};
+use syn::{Lit, Meta, NestedMeta};
 
 pub enum PathOrList {
     Path(Ident),
@@ -88,6 +90,54 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
         },
         _ => Err(SanitizerError::new(4)),
     }
+}
+
+pub fn init_struct(
+    init: &mut TokenStream2,
+    field: &TypeOrNested,
+    x: &Ident,
+    call: &mut TokenStream2,
+) {
+    if !field.is_int() {
+        init.append_all(quote! {
+            let mut instance = StringSanitizer::from(self.#x.as_str());
+        })
+    } else {
+        init.append_all(quote! {
+            let mut instance = IntSanitizer::from(self.#x);
+        })
+    }
+    call.append_all(quote! {
+        self.#x = instance.get();
+    });
+}
+
+pub fn init_enum(
+    init: &mut TokenStream2,
+    field: &TypeOrNested,
+    x: &Ident,
+    call: &mut TokenStream2,
+) {
+    if !field.is_int() {
+        init.append_all(quote! {
+            let mut instance = StringSanitizer::from(String::new());
+            if let Self::#x(x) = self {
+                instance = StringSanitizer::from(x.clone());
+            }
+        })
+    } else {
+        init.append_all(quote! {
+            let mut instance = IntSanitizer::from(0);
+            if let Self::#x(x) = self {
+                instance = IntSanitizer::from(*x);
+            }
+        })
+    }
+    call.append_all(quote! {
+        if let Self::#x(x) = self {
+            *x = instance.get();
+        };
+    });
 }
 
 pub fn get_first_arg(meta: &NestedMeta) -> Option<String> {

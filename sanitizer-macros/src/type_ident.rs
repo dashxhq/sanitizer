@@ -21,6 +21,11 @@ impl TypeOrNested {
             false
         }
     }
+    pub fn set_type(&mut self, y: TypeIdent) {
+        if let Self::Type(_, x) = self {
+            *x = y
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
