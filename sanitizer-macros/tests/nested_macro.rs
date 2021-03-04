@@ -16,6 +16,7 @@ struct OtherInfo {
     email: String,
 }
 
+#[allow(dead_code)]
 #[derive(Sanitize)]
 enum FirstEnum {
     #[sanitize]
@@ -23,6 +24,7 @@ enum FirstEnum {
     None,
 }
 
+#[allow(dead_code)]
 #[derive(Sanitize)]
 enum OtherEnum {
     #[sanitize(trim)]
