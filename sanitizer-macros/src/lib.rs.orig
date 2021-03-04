@@ -92,7 +92,13 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                     if val.is_enum() {
                         init_enum(&mut init, field, x, &mut call);
                     } else {
+<<<<<<< HEAD
                         init_struct(&mut init, field, x, &mut call);
+=======
+                        init.append_all(quote! {
+                            let mut instance = IntSanitizer::from(self.#x);
+                        })
+>>>>>>> origin/main
                     }
                 }
                 TypeOrNested::Nested(x, y) => {
