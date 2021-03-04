@@ -1,6 +1,10 @@
 [package]
 name = "sanitizer_macros"
+<<<<<<< HEAD
 version = "0.1.3"
+=======
+version = "0.1.2"
+>>>>>>> origin/main
 edition = "2018"
 authors = ["weegee <dakshupadhyay991@gmail.com>"]
 license = "MIT"

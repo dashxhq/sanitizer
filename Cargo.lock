@@ -236,7 +236,11 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "sanitizer"
+<<<<<<< HEAD
 version = "0.1.2"
+=======
+version = "0.1.1"
+>>>>>>> origin/main
 dependencies = [
  "heck",
  "num-traits",
@@ -247,7 +251,11 @@ dependencies = [
 
 [[package]]
 name = "sanitizer_macros"
+<<<<<<< HEAD
 version = "0.1.2"
+=======
+version = "0.1.1"
+>>>>>>> origin/main
 dependencies = [
  "proc-macro2",
  "quote",
