@@ -1,8 +1,8 @@
 use crate::arg::ArgBuilder;
 use crate::codegen::PathOrList;
 use crate::sanitizer::SanitizerError;
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::export::TokenStream2;
 
 #[macro_use]
 macro_rules! sanitizer_with_arg {
@@ -15,7 +15,7 @@ macro_rules! sanitizer_with_arg {
     };
 }
 
-pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, SanitizerError> {
+pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, SanitizerError> {
     match sanitizer.to_string().as_str() {
         "trim" => Ok(quote! { trim() }),
         "numeric" => Ok(quote! { numeric() }),

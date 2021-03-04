@@ -6,8 +6,8 @@ use crate::codegen::{init_enum, init_struct, methods_layout};
 use crate::sanitizer::parse_sanitizers;
 use crate::type_ident::TypeOrNested;
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, TokenStreamExt};
-use syn::export::TokenStream2;
 use syn::{parse_macro_input, DeriveInput};
 
 // argument parsing and storing

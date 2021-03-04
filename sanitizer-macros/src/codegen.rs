@@ -3,7 +3,7 @@ use crate::sanitizer::SanitizerError;
 use crate::sanitizers::*;
 use crate::type_ident::{TypeIdent, TypeOrNested};
 use proc_macro2::Ident;
-use syn::export::TokenStream2;
+use proc_macro2::TokenStream;
 
 use quote::{quote, TokenStreamExt};
 use std::fmt;
@@ -19,7 +19,7 @@ pub enum PathOrList {
 pub fn sanitizer_function_body(
     sanitizer: &PathOrList,
     type_of_field: TypeIdent,
-) -> Result<TokenStream2, SanitizerError> {
+) -> Result<TokenStream, SanitizerError> {
     if type_of_field.is_int() {
         int::get_int_sanitizers(sanitizer)
     } else if type_of_field.is_string() {
@@ -29,7 +29,7 @@ pub fn sanitizer_function_body(
     }
 }
 
-pub fn methods_layout(list: &Vec<NestedMeta>, type_of_field: TypeIdent) -> TokenStream2 {
+pub fn methods_layout(list: &Vec<NestedMeta>, type_of_field: TypeIdent) -> TokenStream {
     let mut methods = quote! {};
 
     methods.append_all(list.iter().map(|e| {
@@ -93,10 +93,10 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
 }
 
 pub fn init_struct(
-    init: &mut TokenStream2,
+    init: &mut TokenStream,
     field: &TypeOrNested,
     x: &Ident,
-    call: &mut TokenStream2,
+    call: &mut TokenStream,
 ) {
     if !field.is_int() {
         init.append_all(quote! {
@@ -112,12 +112,7 @@ pub fn init_struct(
     });
 }
 
-pub fn init_enum(
-    init: &mut TokenStream2,
-    field: &TypeOrNested,
-    x: &Ident,
-    call: &mut TokenStream2,
-) {
+pub fn init_enum(init: &mut TokenStream, field: &TypeOrNested, x: &Ident, call: &mut TokenStream) {
     if !field.is_int() {
         init.append_all(quote! {
             let mut instance = StringSanitizer::from(String::new());
