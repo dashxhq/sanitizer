@@ -44,38 +44,44 @@ pub fn populate_map_struct(
 ) -> Result<StructOrEnum, SanitizerError> {
     // iterate over each field
     for field in named_fields.named.iter() {
+        let mut push = false;
         let mut sanitizers = Vec::new();
         let field_type = TypeIdent::try_from(field.clone().ty)?;
         let mut type_field = TypeOrNested::Type(field.clone().ident.unwrap(), field_type.clone());
         // get the attributes over the field
         for attr in field.attrs.iter() {
             // parse the attribute
-            let meta = attr.parse_meta().unwrap();
-            match meta {
-                // the attribute should be a list. for eg. sanitise(options)
-                Meta::List(ref list) => {
-                    // make sure the field type is string only
-                    if field_type.is_string_or_int() {
-                        if attr.path.is_ident("sanitize") {
+            if attr.path.is_ident("sanitize") {
+                push = true;
+                let meta = attr.parse_meta().unwrap();
+                match meta {
+                    // the attribute should be a list. for eg. sanitise(options)
+                    Meta::List(ref list) => {
+                        // make sure the field type is string only
+                        if field_type.is_string_or_int() {
                             // get the sanitizers
                             sanitizers.extend(list.nested.iter().cloned())
+                        } else {
+                            return Err(SanitizerError::new(0));
                         }
-                    } else {
-                        return Err(SanitizerError::new(0));
                     }
-                }
-                Meta::Path(_) => {
-                    if field_type.is_string_or_int() {
-                        return Err(SanitizerError::new(2));
-                    } else {
-                        type_field =
-                            TypeOrNested::Nested(field.clone().ident.unwrap(), field_type.ident())
+                    Meta::Path(_) => {
+                        if field_type.is_string_or_int() {
+                            return Err(SanitizerError::new(2));
+                        } else {
+                            type_field = TypeOrNested::Nested(
+                                field.clone().ident.unwrap(),
+                                field_type.ident(),
+                            )
+                        }
                     }
+                    _ => return Err(SanitizerError::new(4)),
                 }
-                _ => return Err(SanitizerError::new(4)),
             }
         }
-        map.insert(type_field, sanitizers);
+        if push {
+            map.insert(type_field, sanitizers);
+        }
     }
     Ok(StructOrEnum::Struct(map.clone()))
 }
@@ -91,9 +97,9 @@ pub fn populate_map_enum(
         let mut type_field = TypeOrNested::Type(variant.clone().ident, field_type);
         let mut push = false;
         for attr in variant.attrs.iter() {
-            push = true;
             let meta = attr.parse_meta().unwrap();
             if attr.path.is_ident("sanitize") {
+                push = true;
                 match meta {
                     // the attribute should be a list. for eg. sanitise(options)
                     Meta::List(ref list) => {
