@@ -1,11 +1,9 @@
 use crate::type_ident::{TypeIdent, TypeOrNested};
-use proc_macro2::Span;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use syn::Ident;
 use syn::{Data, DataEnum, Fields, FieldsNamed, Meta, NestedMeta};
 
 // SanitizerError is a custom error type that includes
@@ -46,13 +44,16 @@ pub fn populate_map_struct(
     for field in named_fields.named.iter() {
         let mut push = false;
         let mut sanitizers = Vec::new();
-        let field_type = TypeIdent::try_from(field.clone().ty)?;
+
+        let mut field_type: TypeIdent = Default::default();
         let mut type_field = TypeOrNested::Type(field.clone().ident.unwrap(), field_type.clone());
         // get the attributes over the field
         for attr in field.attrs.iter() {
             // parse the attribute
             if attr.path.is_ident("sanitize") {
                 push = true;
+                field_type = TypeIdent::try_from(field.ty.clone())?;
+                type_field.set_type(field_type.clone());
                 let meta = attr.parse_meta().unwrap();
                 match meta {
                     // the attribute should be a list. for eg. sanitise(options)
@@ -93,7 +94,7 @@ pub fn populate_map_enum(
     // iterate over each field
     for variant in named_fields.variants.iter() {
         let mut sanitizers = Vec::new();
-        let mut field_type = TypeIdent::new(Ident::new("_", Span::call_site()), false);
+        let mut field_type = Default::default();
         let mut type_field = TypeOrNested::Type(variant.clone().ident, field_type);
         let mut push = false;
         for attr in variant.attrs.iter() {
@@ -181,6 +182,7 @@ impl Display for SanitizerError {
             6 => "Wrong number of arguments",
             7 => "The argument can be only 64 bit int",
             8 => "Enums can contain only unnamed field",
+            9 => "Only Option<T> supported for now",
             _ => "",
         };
         write!(f, "{}", case)

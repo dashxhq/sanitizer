@@ -1,10 +1,8 @@
 use crate::arg::Args;
 use crate::sanitizer::SanitizerError;
 use crate::sanitizers::*;
-use crate::type_ident::{TypeIdent, TypeOrNested};
-use proc_macro2::Ident;
-use proc_macro2::TokenStream;
-
+use crate::type_ident::TypeIdent;
+use proc_macro2::{Ident, TokenStream};
 use quote::{quote, TokenStreamExt};
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -92,28 +90,44 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
     }
 }
 
-pub fn init_struct(
-    init: &mut TokenStream,
-    field: &TypeOrNested,
-    x: &Ident,
-    call: &mut TokenStream,
-) {
-    if !field.is_int() {
-        init.append_all(quote! {
-            let mut instance = StringSanitizer::from(self.#x.as_str());
-        })
+pub fn init_struct(init: &mut TokenStream, field: &TypeIdent, x: &Ident, call: &mut TokenStream) {
+    if field.is_option {
+        if field.is_int {
+            init.append_all(quote! {
+                let mut instance = IntSanitizer::from(0);
+                if let Some(x) = self.#x {
+                    instance = IntSanitizer::from(x);
+                }
+            })
+        } else {
+            init.append_all(quote! {
+                let mut instance = StringSanitizer::from(String::new());
+                if let Some(x) = &self.#x {
+                    instance = StringSanitizer::from(x.as_str());
+                }
+            })
+        }
+        call.append_all(quote! {
+            self.#x = Some(instance.get());
+        });
     } else {
-        init.append_all(quote! {
-            let mut instance = IntSanitizer::from(self.#x);
-        })
+        if field.is_int {
+            init.append_all(quote! {
+                let mut instance = IntSanitizer::from(self.#x);
+            })
+        } else {
+            init.append_all(quote! {
+                let mut instance = StringSanitizer::from(self.#x.as_str());
+            })
+        }
+        call.append_all(quote! {
+            self.#x = instance.get();
+        });
     }
-    call.append_all(quote! {
-        self.#x = instance.get();
-    });
 }
 
-pub fn init_enum(init: &mut TokenStream, field: &TypeOrNested, x: &Ident, call: &mut TokenStream) {
-    if !field.is_int() {
+pub fn init_enum(init: &mut TokenStream, field: &TypeIdent, x: &Ident, call: &mut TokenStream) {
+    if !field.is_int {
         init.append_all(quote! {
             let mut instance = StringSanitizer::from(String::new());
             if let Self::#x(x) = self {

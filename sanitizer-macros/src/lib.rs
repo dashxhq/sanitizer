@@ -90,9 +90,9 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                     layout = methods_layout(r.1, y.clone());
 
                     if val.is_enum() {
-                        init_enum(&mut init, field, x, &mut call);
+                        init_enum(&mut init, y, x, &mut call);
                     } else {
-                        init_struct(&mut init, field, x, &mut call);
+                        init_struct(&mut init, y, x, &mut call);
                     }
                 }
                 TypeOrNested::Nested(x, y) => {
