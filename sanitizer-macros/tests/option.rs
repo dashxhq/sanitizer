@@ -22,6 +22,6 @@ fn option_test() {
     };
     instance.sanitize();
     assert_eq!(instance.name, Some(String::from("Test")));
-    assert_eq!(instance.address, Some(String::from("Mars,i'melonmusk")));
+    assert_eq!(instance.address, Some(String::from("Mars, i'm elon musk")));
     assert_eq!(instance.age, Some(1));
 }
