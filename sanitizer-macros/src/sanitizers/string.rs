@@ -6,12 +6,12 @@ use quote::quote;
 
 #[macro_use]
 macro_rules! sanitizer_with_arg {
-    ( $sanitizer : expr, $method_name : ident, $arg : expr  ) => {
+    ( $sanitizer : expr, $method_name : ident, $arg : expr, $func_call : ident ) => {
         if $sanitizer.has_args() {
             if $sanitizer.get_args().len() == 1 {
                 let arg_one = ArgBuilder::$method_name($arg);
                 Ok(quote! {
-                    cut(#arg_one)
+                    $func_call(#arg_one)
                 })
             } else {
                 Err(SanitizerError::new(6))
@@ -34,10 +34,15 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sani
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
         "e164" => Ok(quote! { e164() }),
         "clamp" => {
-            sanitizer_with_arg!(sanitizer, int, &sanitizer.get_args().args[0])
+            sanitizer_with_arg!(sanitizer, int, &sanitizer.get_args().args[0], cut)
         }
         "custom" => {
-            sanitizer_with_arg!(sanitizer, ident, sanitizer.get_args().args[0].as_str())
+            sanitizer_with_arg!(
+                sanitizer,
+                ident,
+                sanitizer.get_args().args[0].as_str(),
+                call
+            )
         }
         _ => Err(SanitizerError::new(5)),
     }
