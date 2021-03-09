@@ -86,28 +86,28 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
             let mut init = quote! {};
             let mut layout = quote! {};
             match field {
-                TypeOrNested::Type(x, y) => {
-                    layout = methods_layout(r.1, y.clone());
+                TypeOrNested::Type(field, type_ident) => {
+                    layout = methods_layout(r.1, type_ident.clone());
 
                     if val.is_enum() {
-                        init_enum(&mut init, y, x, &mut call);
+                        init_enum(&mut init, type_ident, field, &mut call);
                     } else {
-                        init_struct(&mut init, y, x, &mut call);
+                        init_struct(&mut init, type_ident, field, &mut call);
                     }
                 }
-                TypeOrNested::Nested(x, y) => {
+                TypeOrNested::Nested(field, type_ident) => {
                     if val.is_enum() {
                         call.append_all({
                             quote! {
-                                if let Self::#x(x) = self {
-                                    <#y as Sanitize>::sanitize(x);
+                                if let Self::#field(x) = self {
+                                    <#type_ident as Sanitize>::sanitize(x);
                                 }
                             }
                         });
                     } else {
                         call.append_all({
                             quote! {
-                                <#y as Sanitize>::sanitize(&mut self.#x);
+                                <#type_ident as Sanitize>::sanitize(&mut self.#field);
                             }
                         });
                     }

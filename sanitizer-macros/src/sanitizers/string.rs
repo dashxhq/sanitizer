@@ -6,9 +6,16 @@ use quote::quote;
 
 #[macro_use]
 macro_rules! sanitizer_with_arg {
-    ( $sanitizer : expr, $body : expr ) => {
+    ( $sanitizer : expr, $method_name : ident, $arg : expr  ) => {
         if $sanitizer.has_args() {
-            $body
+            if $sanitizer.get_args().len() == 1 {
+                let arg_one = ArgBuilder::$method_name($arg);
+                Ok(quote! {
+                    cut(#arg_one)
+                })
+            } else {
+                Err(SanitizerError::new(6))
+            }
         } else {
             Err(SanitizerError::new(7))
         }
@@ -27,28 +34,10 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sani
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
         "e164" => Ok(quote! { e164() }),
         "clamp" => {
-            sanitizer_with_arg!(sanitizer, {
-                if sanitizer.get_args().len() == 1 {
-                    let arg_one = ArgBuilder::int(&sanitizer.get_args().args[0]);
-                    Ok(quote! {
-                        cut(#arg_one)
-                    })
-                } else {
-                    Err(SanitizerError::new(6))
-                }
-            })
+            sanitizer_with_arg!(sanitizer, int, &sanitizer.get_args().args[0])
         }
         "custom" => {
-            sanitizer_with_arg!(sanitizer, {
-                if sanitizer.get_args().len() == 1 {
-                    let arg_one = ArgBuilder::ident(sanitizer.get_args().args[0].as_str());
-                    Ok(quote! {
-                        call(#arg_one)
-                    })
-                } else {
-                    Err(SanitizerError::new(6))
-                }
-            })
+            sanitizer_with_arg!(sanitizer, ident, sanitizer.get_args().args[0].as_str())
         }
         _ => Err(SanitizerError::new(5)),
     }

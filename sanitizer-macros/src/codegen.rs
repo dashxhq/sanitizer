@@ -90,60 +90,70 @@ pub fn meta_list(meta: &NestedMeta) -> Result<PathOrList, SanitizerError> {
     }
 }
 
-pub fn init_struct(init: &mut TokenStream, field: &TypeIdent, x: &Ident, call: &mut TokenStream) {
-    if field.is_option {
-        if field.is_int {
+pub fn init_struct(
+    init: &mut TokenStream,
+    type_ident: &TypeIdent,
+    field: &Ident,
+    call: &mut TokenStream,
+) {
+    if type_ident.is_option {
+        if type_ident.is_int {
             init.append_all(quote! {
                 let mut instance = IntSanitizer::from(0);
-                if let Some(x) = self.#x {
+                if let Some(x) = self.#field {
                     instance = IntSanitizer::from(x);
                 }
             })
         } else {
             init.append_all(quote! {
                 let mut instance = StringSanitizer::from(String::new());
-                if let Some(x) = &self.#x {
+                if let Some(x) = &self.#field {
                     instance = StringSanitizer::from(x.as_str());
                 }
             })
         }
         call.append_all(quote! {
-            self.#x = Some(instance.get());
+            self.#field = Some(instance.get());
         });
     } else {
-        if field.is_int {
+        if type_ident.is_int {
             init.append_all(quote! {
-                let mut instance = IntSanitizer::from(self.#x);
+                let mut instance = IntSanitizer::from(self.#field);
             })
         } else {
             init.append_all(quote! {
-                let mut instance = StringSanitizer::from(self.#x.as_str());
+                let mut instance = StringSanitizer::from(self.#field.as_str());
             })
         }
         call.append_all(quote! {
-            self.#x = instance.get();
+            self.#field = instance.get();
         });
     }
 }
 
-pub fn init_enum(init: &mut TokenStream, field: &TypeIdent, x: &Ident, call: &mut TokenStream) {
-    if !field.is_int {
+pub fn init_enum(
+    init: &mut TokenStream,
+    type_ident: &TypeIdent,
+    field_name: &Ident,
+    call: &mut TokenStream,
+) {
+    if type_ident.is_int {
         init.append_all(quote! {
-            let mut instance = StringSanitizer::from(String::new());
-            if let Self::#x(x) = self {
-                instance = StringSanitizer::from(x.clone());
+            let mut instance = IntSanitizer::from(0);
+            if let Self::#field_name(x) = self {
+                instance = IntSanitizer::from(*x);
             }
         })
     } else {
         init.append_all(quote! {
-            let mut instance = IntSanitizer::from(0);
-            if let Self::#x(x) = self {
-                instance = IntSanitizer::from(*x);
+            let mut instance = StringSanitizer::from(String::new());
+            if let Self::#field_name(x) = self {
+                instance = StringSanitizer::from(x.clone());
             }
         })
     }
     call.append_all(quote! {
-        if let Self::#x(x) = self {
+        if let Self::#field_name(x) = self {
             *x = instance.get();
         };
     });

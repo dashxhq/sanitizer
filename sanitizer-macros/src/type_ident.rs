@@ -16,9 +16,9 @@ pub enum TypeOrNested {
 }
 
 impl TypeOrNested {
-    pub fn set_type(&mut self, y: TypeIdent) {
-        if let Self::Type(_, x) = self {
-            *x = y
+    pub fn set_type(&mut self, new_type: TypeIdent) {
+        if let Self::Type(_, old_type) = self {
+            *old_type = new_type
         }
     }
 }
@@ -88,10 +88,10 @@ impl TryFrom<Type> for TypeIdent {
     type Error = SanitizerError;
     fn try_from(type_ident: Type) -> Result<Self, Self::Error> {
         match type_ident {
-            Type::Path(x) => {
-                if let Some(y) = x.path.segments.last() {
-                    let ident = y.clone().ident;
-                    let is_option = is_option(x)?;
+            Type::Path(type_path) => {
+                if let Some(last_segment) = type_path.path.segments.last() {
+                    let ident = last_segment.clone().ident;
+                    let is_option = is_option(type_path)?;
                     let option_wrapper = is_option.1;
                     if is_option.0 {
                         Ok(TypeIdent::new(
