@@ -14,10 +14,10 @@ macro_rules! sanitizer_with_arg {
                     $func_call(#arg_one)
                 })
             } else {
-                Err(SanitizerError::new(6))
+                Err(SanitizerError::WrongArguments)
             }
         } else {
-            Err(SanitizerError::new(7))
+            Err(SanitizerError::Only64BitInt)
         }
     };
 }
@@ -44,6 +44,6 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sani
                 call
             )
         }
-        _ => Err(SanitizerError::new(5)),
+        _ => Err(SanitizerError::InvalidSanitizer),
     }
 }

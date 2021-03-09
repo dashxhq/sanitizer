@@ -31,14 +31,14 @@ fn is_option(typepath: TypePath) -> Result<(bool, Ident), SanitizerError> {
                     let type_wrapped = &params.args;
                     match &type_wrapped[0] {
                         GenericArgument::Type(ty) => match ty {
-                            Type::Path(x) => {
-                                if let Some(y) = x.path.segments.last() {
-                                    return Ok((true, y.clone().ident));
+                            Type::Path(inner_type_path) => {
+                                if let Some(inner_type) = inner_type_path.path.segments.last() {
+                                    return Ok((true, inner_type.clone().ident));
                                 }
                             }
                             _ => panic!("Invalid wrapper type for Option<T>"),
                         },
-                        _ => return Err(SanitizerError::new(9)),
+                        _ => return Err(SanitizerError::OnlyOptionTSupported),
                     }
                 }
                 _ => panic!("No wrapper in type"),
@@ -107,10 +107,10 @@ impl TryFrom<Type> for TypeIdent {
                         ))
                     }
                 } else {
-                    Err(SanitizerError::new(0))
+                    Err(SanitizerError::InvalidFieldType)
                 }
             }
-            _ => Err(SanitizerError::new(0)),
+            _ => Err(SanitizerError::InvalidFieldType),
         }
     }
 }

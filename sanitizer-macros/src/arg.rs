@@ -19,12 +19,12 @@ impl ArgBuilder {
     // hacky whitespace removal, should be fixed in future versions
     pub fn int(int: &str) -> LitInt {
         let mut owned = int.to_owned();
-        owned.retain(|c| !c.is_whitespace());
+        owned.retain(|character| !character.is_whitespace());
         LitInt::new(&owned, Span::call_site())
     }
     pub fn ident(ident: &str) -> Ident {
         let mut owned = ident.to_owned();
-        owned.retain(|c| !c.is_whitespace());
+        owned.retain(|character| !character.is_whitespace());
         Ident::new(&owned, Span::call_site())
     }
 }

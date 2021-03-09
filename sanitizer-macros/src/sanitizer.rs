@@ -9,8 +9,17 @@ use syn::{Data, DataEnum, Fields, FieldsNamed, Meta, NestedMeta};
 // SanitizerError is a custom error type that includes
 // info on why proc macro parsing for Sanitizer crate failed
 #[derive(Debug)]
-pub struct SanitizerError {
-    pub code: u8,
+pub enum SanitizerError {
+    InvalidFieldType,
+    UnnamedFields,
+    SanitizerNotSpecified,
+    OnlyStructsAndEnumsAllowed,
+    MacrosWithListOnly,
+    InvalidSanitizer,
+    WrongArguments,
+    Only64BitInt,
+    EnumsUnamedFields,
+    OnlyOptionTSupported,
 }
 
 // the type of map where we store the fields with the lints
@@ -28,11 +37,11 @@ pub fn parse_sanitizers(data: Data) -> Result<StructOrEnum, SanitizerError> {
             match structure.fields {
                 // applied on named fields of the structs
                 Fields::Named(named_fields) => populate_map_struct(named_fields, &mut map),
-                _ => Err(SanitizerError::new(1)),
+                _ => Err(SanitizerError::UnnamedFields),
             }
         }
-        Data::Enum(x) => populate_map_enum(x, &mut map),
-        _ => Err(SanitizerError::new(3)),
+        Data::Enum(enum_data) => populate_map_enum(enum_data, &mut map),
+        _ => Err(SanitizerError::OnlyStructsAndEnumsAllowed),
     }
 }
 
@@ -63,12 +72,12 @@ pub fn populate_map_struct(
                             // get the sanitizers
                             sanitizers.extend(list.nested.iter().cloned())
                         } else {
-                            return Err(SanitizerError::new(0));
+                            return Err(SanitizerError::InvalidFieldType);
                         }
                     }
                     Meta::Path(_) => {
                         if field_type.is_string_or_int() {
-                            return Err(SanitizerError::new(2));
+                            return Err(SanitizerError::SanitizerNotSpecified);
                         } else {
                             type_field = TypeOrNested::Nested(
                                 field.clone().ident.unwrap(),
@@ -76,7 +85,7 @@ pub fn populate_map_struct(
                             )
                         }
                     }
-                    _ => return Err(SanitizerError::new(4)),
+                    _ => return Err(SanitizerError::MacrosWithListOnly),
                 }
             }
         }
@@ -105,28 +114,28 @@ pub fn populate_map_enum(
                     // the attribute should be a list. for eg. sanitise(options)
                     Meta::List(ref list) => {
                         match &variant.fields {
-                            Fields::Unnamed(x) => {
-                                for unnamed in x.unnamed.iter() {
+                            Fields::Unnamed(fields) => {
+                                for unnamed in fields.unnamed.iter() {
                                     field_type = TypeIdent::try_from(unnamed.ty.clone())?;
                                     type_field.set_type(field_type.clone());
                                     if field_type.is_string_or_int() {
                                         // get the sanitizers
                                         sanitizers.extend(list.nested.iter().cloned())
                                     } else {
-                                        return Err(SanitizerError::new(0));
+                                        return Err(SanitizerError::InvalidFieldType);
                                     }
                                 }
                             }
-                            _ => return Err(SanitizerError::new(8)),
+                            _ => return Err(SanitizerError::EnumsUnamedFields),
                         }
                     }
                     Meta::Path(_) => match &variant.fields {
-                        Fields::Unnamed(x) => {
-                            for unnamed in x.unnamed.iter() {
+                        Fields::Unnamed(fields) => {
+                            for unnamed in fields.unnamed.iter() {
                                 field_type = TypeIdent::try_from(unnamed.ty.clone())?;
                                 type_field.set_type(field_type.clone());
                                 if field_type.is_string_or_int() {
-                                    return Err(SanitizerError::new(2));
+                                    return Err(SanitizerError::SanitizerNotSpecified);
                                 } else {
                                     type_field = TypeOrNested::Nested(
                                         variant.clone().ident,
@@ -135,9 +144,9 @@ pub fn populate_map_enum(
                                 }
                             }
                         }
-                        _ => return Err(SanitizerError::new(8)),
+                        _ => return Err(SanitizerError::EnumsUnamedFields),
                     },
-                    _ => return Err(SanitizerError::new(4)),
+                    _ => return Err(SanitizerError::MacrosWithListOnly),
                 }
             }
         }
@@ -158,32 +167,27 @@ impl StructOrEnum {
     }
     pub fn get_map(&self) -> &FieldMap {
         match self {
-            Self::Enum(x) => x,
-            Self::Struct(x) => x,
+            Self::Enum(enum_fields) => enum_fields,
+            Self::Struct(struct_fields) => struct_fields,
         }
-    }
-}
-
-impl SanitizerError {
-    pub fn new(code: u8) -> Self {
-        Self { code }
     }
 }
 
 impl Display for SanitizerError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        let case = match self.code {
-            0 => "Invalid field type",
-            1 => "Struct cannot contain unnamed fields",
-            2 => "Please specify at least a single sanitizer",
-            3 => "Macro can be only applied on structs",
-            4 => "Macros that contain a structured meta list are allowed only",
-            5 => "Invalid sanitizer",
-            6 => "Wrong number of arguments",
-            7 => "The argument can be only 64 bit int",
-            8 => "Enums can contain only unnamed field",
-            9 => "Only Option<T> supported for now",
-            _ => "",
+        let case = match self {
+            Self::InvalidFieldType => "Invalid field type",
+            Self::UnnamedFields => "Struct cannot contain unnamed fields",
+            Self::SanitizerNotSpecified => "Please specify at least a single sanitizer",
+            Self::OnlyStructsAndEnumsAllowed => "Macro can be only applied on structs",
+            Self::MacrosWithListOnly => {
+                "Macros that contain a structured meta list are allowed only"
+            }
+            Self::InvalidSanitizer => "Invalid sanitizer",
+            Self::WrongArguments => "Wrong number of arguments",
+            Self::Only64BitInt => "The argument can be only 64 bit int",
+            Self::EnumsUnamedFields => "Enums can contain only unnamed field",
+            Self::OnlyOptionTSupported => "Only Option<T> supported for now",
         };
         write!(f, "{}", case)
     }

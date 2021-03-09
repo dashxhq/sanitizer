@@ -10,7 +10,7 @@ macro_rules! sanitizer_with_arg {
         if $sanitizer.has_args() {
             $body
         } else {
-            Err(SanitizerError::new(7))
+            Err(SanitizerError::Only64BitInt)
         }
     };
 }
@@ -26,7 +26,7 @@ pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sanitiz
                         clamp(#arg_one, #arg_two)
                     })
                 } else {
-                    Err(SanitizerError::new(6))
+                    Err(SanitizerError::WrongArguments)
                 }
             })
         }
@@ -38,10 +38,10 @@ pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sanitiz
                         call(#arg_one)
                     })
                 } else {
-                    Err(SanitizerError::new(6))
+                    Err(SanitizerError::WrongArguments)
                 }
             })
         }
-        _ => Err(SanitizerError::new(5)),
+        _ => Err(SanitizerError::InvalidSanitizer),
     }
 }
