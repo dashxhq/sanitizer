@@ -2,12 +2,12 @@
 #![forbid(unsafe_code)]
 //! Macros that allows seamless sanitizing
 //! on struct fields
-use crate::codegen::methods_layout;
+use crate::codegen::{init_enum, init_struct, methods_layout};
 use crate::sanitizer::parse_sanitizers;
 use crate::type_ident::TypeOrNested;
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, TokenStreamExt};
-use syn::export::TokenStream2;
 use syn::{parse_macro_input, DeriveInput};
 
 // argument parsing and storing
@@ -80,32 +80,38 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     let mut inner_body: TokenStream2 = Default::default();
     let parsed = parse_sanitizers(input_parsed.data);
     if let Ok(ref val) = parsed {
-        inner_body.append_all(val.iter().map(|r| {
+        inner_body.append_all(val.get_map().iter().map(|r| {
             let field = r.0;
             let mut call = quote! {};
             let mut init = quote! {};
             let mut layout = quote! {};
             match field {
-                TypeOrNested::Type(x, y) => {
-                    layout = methods_layout(r.1, y.clone());
-                    if !field.is_int() {
-                        init.append_all(quote! {
-                            let mut instance = StringSanitizer::from(self.#x.as_str());
-                        })
+                TypeOrNested::Type(field, type_ident) => {
+                    layout = methods_layout(r.1, type_ident.clone());
+
+                    if val.is_enum() {
+                        init_enum(&mut init, type_ident, field, &mut call);
                     } else {
-                        init.append_all(quote! {
-                            let mut instance = IntSanitizer::from(self.#x);
-                        })
+                        init_struct(&mut init, type_ident, field, &mut call);
                     }
-                    call.append_all(quote! {
-                        self.#x = instance.get();
-                    });
                 }
-                TypeOrNested::Nested(x, y) => call.append_all({
-                    quote! {
-                        <#y as Sanitize>::sanitize(&mut self.#x);
+                TypeOrNested::Nested(field, type_ident) => {
+                    if val.is_enum() {
+                        call.append_all({
+                            quote! {
+                                if let Self::#field(x) = self {
+                                    <#type_ident as Sanitize>::sanitize(x);
+                                }
+                            }
+                        });
+                    } else {
+                        call.append_all({
+                            quote! {
+                                <#type_ident as Sanitize>::sanitize(&mut self.#field);
+                            }
+                        });
                     }
-                }),
+                }
             }
             quote! {
                 #init

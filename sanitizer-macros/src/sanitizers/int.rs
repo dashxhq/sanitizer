@@ -1,8 +1,8 @@
 use crate::arg::ArgBuilder;
 use crate::codegen::PathOrList;
 use crate::sanitizer::SanitizerError;
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::export::TokenStream2;
 
 #[macro_use]
 macro_rules! sanitizer_with_arg {
@@ -10,12 +10,12 @@ macro_rules! sanitizer_with_arg {
         if $sanitizer.has_args() {
             $body
         } else {
-            Err(SanitizerError::new(7))
+            Err(SanitizerError::Only64BitInt)
         }
     };
 }
 
-pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, SanitizerError> {
+pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, SanitizerError> {
     match sanitizer.to_string().as_str() {
         "clamp" => {
             sanitizer_with_arg!(sanitizer, {
@@ -26,7 +26,7 @@ pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, Saniti
                         clamp(#arg_one, #arg_two)
                     })
                 } else {
-                    Err(SanitizerError::new(6))
+                    Err(SanitizerError::WrongArguments)
                 }
             })
         }
@@ -38,10 +38,10 @@ pub fn get_int_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream2, Saniti
                         call(#arg_one)
                     })
                 } else {
-                    Err(SanitizerError::new(6))
+                    Err(SanitizerError::WrongArguments)
                 }
             })
         }
-        _ => Err(SanitizerError::new(5)),
+        _ => Err(SanitizerError::InvalidSanitizer),
     }
 }
