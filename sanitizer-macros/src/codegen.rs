@@ -98,23 +98,51 @@ pub fn init_struct(
 ) {
     if type_ident.is_option {
         if type_ident.is_int {
-            init.append_all(quote! {
-                let mut instance = IntSanitizer::from(0);
-                if let Some(x) = self.#field {
-                    instance = IntSanitizer::from(x);
-                }
-            })
+            if type_ident.is_nested {
+                init.append_all(quote! {
+                    let mut instance = IntSanitizer::from(0);
+                    if let Some(x) = self.#field {
+                        if let Some(y) = x {
+                            instance = IntSanitizer::from(y);
+                        }
+                    }
+                })
+            } else {
+                init.append_all(quote! {
+                    let mut instance = IntSanitizer::from(0);
+                    if let Some(x) = self.#field {
+                        instance = IntSanitizer::from(x);
+                    }
+                })
+            }
         } else {
-            init.append_all(quote! {
-                let mut instance = StringSanitizer::from(String::new());
-                if let Some(x) = &self.#field {
-                    instance = StringSanitizer::from(x.as_str());
-                }
-            })
+            if type_ident.is_nested {
+                init.append_all(quote! {
+                    let mut instance = StringSanitizer::from(String::new());
+                    if let Some(x) = &self.#field {
+                        if let Some(y) = x {
+                            instance = StringSanitizer::from(y.as_str());
+                        }
+                    }
+                })
+            } else {
+                init.append_all(quote! {
+                    let mut instance = StringSanitizer::from(String::new());
+                    if let Some(x) = &self.#field {
+                        instance = StringSanitizer::from(x.as_str());
+                    }
+                })
+            }
         }
-        call.append_all(quote! {
-            self.#field = Some(instance.get());
-        });
+        if type_ident.is_nested {
+            call.append_all(quote! {
+                self.#field = Some(Some(instance.get()));
+            });
+        } else {
+            call.append_all(quote! {
+                self.#field = Some(instance.get());
+            });
+        }
     } else {
         if type_ident.is_int {
             init.append_all(quote! {
