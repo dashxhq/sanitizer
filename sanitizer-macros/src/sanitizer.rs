@@ -165,6 +165,7 @@ impl StructOrEnum {
             false
         }
     }
+
     pub fn get_map(&self) -> &FieldMap {
         match self {
             Self::Enum(enum_fields) => enum_fields,

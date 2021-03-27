@@ -73,6 +73,7 @@ fn is_option(typepath: TypePath, is_nested: bool) -> Result<OptionWrapper, Sanit
             };
         }
     }
+
     Ok(OptionWrapper::new(
         false,
         Ident::new("_", Span::call_site()),
@@ -84,7 +85,6 @@ fn is_option(typepath: TypePath, is_nested: bool) -> Result<OptionWrapper, Sanit
 pub struct TypeIdent {
     pub ident: Ident,
     pub is_int: bool,
-
     pub is_option: bool,
     pub is_nested: bool,
 }
@@ -98,12 +98,15 @@ impl TypeIdent {
             is_nested,
         }
     }
+
     pub fn is_string(&self) -> bool {
         self.ident == "String"
     }
+
     pub fn is_int(&self) -> bool {
         self.is_int
     }
+
     pub fn is_string_or_int(&self) -> bool {
         self.is_int || self.ident == "String"
     }
@@ -121,6 +124,7 @@ impl Default for TypeIdent {
 
 impl TryFrom<Type> for TypeIdent {
     type Error = SanitizerError;
+
     fn try_from(type_ident: Type) -> Result<Self, Self::Error> {
         match type_ident {
             Type::Path(type_path) => {
