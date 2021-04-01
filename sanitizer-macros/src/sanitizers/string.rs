@@ -1,5 +1,5 @@
 use crate::arg::ArgBuilder;
-use crate::codegen::PathOrList;
+use crate::codegen::sanitizers::PathOrList;
 use crate::sanitizer::SanitizerError;
 use proc_macro2::TokenStream;
 use quote::quote;

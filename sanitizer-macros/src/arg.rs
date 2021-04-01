@@ -4,10 +4,12 @@ use syn::{Ident, LitInt};
 pub struct Args {
     pub args: Vec<String>,
 }
+
 impl Args {
     pub fn len(&self) -> usize {
         self.args.len()
     }
+
     pub fn new(args: Vec<String>) -> Self {
         Self { args }
     }
@@ -22,6 +24,7 @@ impl ArgBuilder {
         owned.retain(|character| !character.is_whitespace());
         LitInt::new(&owned, Span::call_site())
     }
+
     pub fn ident(ident: &str) -> Ident {
         let mut owned = ident.to_owned();
         owned.retain(|character| !character.is_whitespace());
