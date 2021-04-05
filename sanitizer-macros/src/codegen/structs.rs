@@ -52,13 +52,13 @@ impl StructGen {
 
     fn new_value(&self) -> TokenStream {
         let field_value = Sanitization::new(self.is_int);
+        let mut val = Default::default();
         if self.is_option_nested {
-            let val = field_value.field(&quote! { y });
-            field_value.method_calls(val)
+            val = field_value.field(&quote! { y });
         } else {
-            let val = field_value.field(&quote! { x });
-            field_value.method_calls(val)
+            val = field_value.field(&quote! { x });
         }
+        field_value.method_calls(val)
     }
 
     fn call(&self) -> TokenStream {

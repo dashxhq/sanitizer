@@ -3,7 +3,7 @@
 //! Macros that allows seamless sanitizing
 //! on struct fields
 use crate::codegen::enums::EnumGen;
-use crate::codegen::sanitizers::methods_layout;
+use crate::codegen::sanitizers as sanitizer_gen;
 use crate::codegen::structs::StructGen;
 use crate::sanitizer::parse_sanitizers;
 use crate::type_ident::TypeOrNested;
@@ -88,7 +88,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
             let mut body = quote! {};
             match field {
                 TypeOrNested::Type(field, type_ident) => {
-                    let sanitizer_calls = methods_layout(r.1, type_ident.clone());
+                    let sanitizer_calls = sanitizer_gen::methods_layout(r.1, type_ident.clone());
                     let mut stream = Default::default();
                     if val.is_enum() {
                         stream = EnumGen::new(field.clone(), type_ident).body(sanitizer_calls);
