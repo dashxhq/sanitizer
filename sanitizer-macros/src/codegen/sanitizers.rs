@@ -180,6 +180,7 @@ impl PathOrList {
             false
         }
     }
+
     pub fn get_args(&self) -> &Args {
         if let Self::List(_, args) = self {
             args
