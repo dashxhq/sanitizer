@@ -78,7 +78,6 @@ mod type_ident;
 /// - **custom(function)**: A custom function that is called to sanitize a field
 /// according to any other way.
 #[proc_macro_derive(Sanitize, attributes(sanitize))]
-#[allow(unused_assignments)]
 pub fn sanitize(input: TokenStream) -> TokenStream {
     let input_parsed = parse_macro_input!(input as DeriveInput);
     let name = input_parsed.ident;
@@ -91,7 +90,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
             match field {
                 TypeOrNested::Type(field, type_ident) => {
                     let sanitizer_calls = sanitizer_gen::methods_layout(r.1, type_ident.clone());
-                    let mut stream = Default::default();
+                    let stream: TokenStream2;
                     if val.is_enum() {
                         stream = EnumGen::new(field.clone(), type_ident).body(sanitizer_calls);
                     } else {

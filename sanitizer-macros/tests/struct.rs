@@ -61,7 +61,7 @@ fn sanitizer_check() {
     assert_eq!(instance.screaming_snake_case, "HELLO_WORLD");
     assert_eq!(instance.clamp_str, "Hello, Wor");
     assert_eq!(instance.kebab_case, "Hello-World");
-    assert_eq!(instance.screaming_case, "HELLO-WORLD");
+    assert_eq!(instance.screaming_kebab_case, "HELLO-WORLD");
     assert_eq!(instance.clamp_str, "Hello, Wor");
     assert_eq!(instance.clamp_int, 10);
     assert_eq!(instance.phone_number, "+1454");
