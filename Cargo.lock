@@ -236,7 +236,7 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "sanitizer"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "heck",
  "num-traits",
@@ -247,7 +247,7 @@ dependencies = [
 
 [[package]]
 name = "sanitizer_macros"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "proc-macro2",
  "quote",
