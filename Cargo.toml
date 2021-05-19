@@ -3,7 +3,7 @@ name = "sanitizer"
 description = "A collection of methods and macros to sanitize struct fields"
 keywords = ["sanitizer", "validate", "trim", "e164", "case"]
 categories = ["text-processing", "value-formatting"]
-version = "0.1.3"
+version = "0.1.4"
 authors = ["weegee <dakshupadhyay991@gmail.com>"]
 license = "MIT"
 edition = "2018"
@@ -16,7 +16,7 @@ num-traits = "0.2"
 
 [dependencies.sanitizer_macros]
 path = "sanitizer-macros"
-version = "0.2.0"
+version = "0.2.1"
 optional = true
 
 [features]
