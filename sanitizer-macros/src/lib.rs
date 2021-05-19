@@ -69,6 +69,8 @@ mod type_ident;
 /// - **upper_case**: Convert input to upper case.
 /// - **camel_case**: Convert input to camel case.
 /// - **snake_case**: Convert input to snake case.
+/// - **kebab_case**: Convert input to kebab case.
+/// - **screaming_kebab_case**: Convert input to shouty kebab case.
 /// - **e164**: Convert a valid phone number to the e164 international standard, panic if invalid phone number.
 /// - **clamp(min, max)**: Limit an integer input to this region of min to max.
 /// - **clamp(max)**: Cut the string if it exceeds max.

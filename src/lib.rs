@@ -4,7 +4,9 @@
 //! by providing [macros](https://docs.rs/sanitizer_macros/0.1.0/sanitizer_macros/derive.Sanitize.html) and data structures to perform sanitization on
 //! fields.
 //!
-//! # Basic usage
+//! Sanitizer uses [heck](https://docs.rs/heck/) to allow case conversions
+//!
+//! # Example
 //!
 //! If you want your incoming data which is serialised to a
 //! structure to be sanitized then first of all, you make a struct
