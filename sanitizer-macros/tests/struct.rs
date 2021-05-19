@@ -60,7 +60,7 @@ fn sanitizer_check() {
     assert_eq!(instance.snake_case, "hello_world");
     assert_eq!(instance.screaming_snake_case, "HELLO_WORLD");
     assert_eq!(instance.clamp_str, "Hello, Wor");
-    assert_eq!(instance.kebab_case, "Hello-World");
+    assert_eq!(instance.kebab_case, "hello-world");
     assert_eq!(instance.screaming_kebab_case, "HELLO-WORLD");
     assert_eq!(instance.clamp_str, "Hello, Wor");
     assert_eq!(instance.clamp_int, 10);
