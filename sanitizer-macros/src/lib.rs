@@ -128,7 +128,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     let final_body = quote! {
 
         impl sanitizer::Sanitize for #name {
-            fn sanitize(&mut self) -> Result<(), sanitizer::NumberParseError> {
+            fn sanitize(&mut self) -> Result<(), sanitizer::SanitizeError> {
                 #inner_body
                 Ok(())
             }
