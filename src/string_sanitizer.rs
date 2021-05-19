@@ -1,7 +1,9 @@
+use crate::*;
 use heck::*;
 use phonenumber::{parse, Mode};
+use std::cmp::PartialEq;
 use std::convert::From;
-
+use std::ops::Deref;
 /// The Sanitizer structure is a wrapper over a String type which is to
 /// be sanitized.
 ///
@@ -16,6 +18,8 @@ use std::convert::From;
 /// 	.to_lowercase();
 /// assert_eq!(instance.get(), "hello");
 /// ```
+
+#[derive(Clone, Eq, PartialEq)]
 pub struct StringSanitizer(String);
 
 impl StringSanitizer {
@@ -89,14 +93,13 @@ impl StringSanitizer {
         self
     }
     /// Convert the phone number to the E164 International Standard
-    pub fn e164(&mut self) -> &mut Self {
+    pub fn e164(&mut self) -> Result<&mut Self, NumberParseError> {
         let phone_number = parse(None, &self.0);
-        if let Ok(x) = phone_number {
-            self.0 = x.format().mode(Mode::E164).to_string();
-        } else {
-            panic!("{:?}", "Not a valid phone number");
-        }
-        self
+
+        phone_number.map(|number| {
+            self.0 = number.format().mode(Mode::E164).to_string();
+            self
+        })
     }
     /// Truncate the string with the given amount
     pub fn cut(&mut self, amount: usize) -> &mut Self {
@@ -122,6 +125,32 @@ impl From<String> for StringSanitizer {
 impl From<&str> for StringSanitizer {
     fn from(content: &str) -> Self {
         Self::new(content.to_owned())
+    }
+}
+
+impl Deref for StringSanitizer {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl PartialEq<str> for StringSanitizer {
+    fn eq(&self, rhs: &str) -> bool {
+        self.0 == rhs
+    }
+}
+
+impl PartialEq<&str> for StringSanitizer {
+    fn eq(&self, rhs: &&str) -> bool {
+        self.0 == *rhs
+    }
+}
+
+impl PartialEq<String> for StringSanitizer {
+    fn eq(&self, rhs: &String) -> bool {
+        self.0 == rhs.as_str()
     }
 }
 
@@ -153,7 +182,12 @@ mod test {
     string_test!(to_kebab_case, "someString" => "some-string");
     string_test!(to_screaming_kebab_case, "someString" => "SOME-STRING");
     string_test!(to_screaming_snakecase, "someString" => "SOME_STRING");
-    string_test!(e164, "+1 (555) 555-1234" => "+15555551234");
+
+    #[test]
+    fn e164() {
+        let mut number = StringSanitizer::from("+1 (555) 555-1234");
+        assert_eq!("+15555551234", number.e164().unwrap().0);
+    }
 
     #[test]
     fn clamp_max() {
@@ -166,7 +200,7 @@ mod test {
     #[should_panic]
     fn wrong_phone_number() {
         let mut sanitize = StringSanitizer::from("Not a Phone Number");
-        sanitize.e164();
+        sanitize.e164().unwrap();
     }
 
     #[test]
