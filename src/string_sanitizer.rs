@@ -100,7 +100,7 @@ impl StringSanitizer {
             self.0 = number.format().mode(Mode::E164).to_string();
             Ok(self)
         } else {
-            Err(SanitizeError(0))
+            Err(SanitizeError::PhoneParsingError)
         }
     }
     /// Truncate the string with the given amount

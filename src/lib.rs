@@ -54,7 +54,9 @@ use std::error::Error;
 use std::fmt::{Display, Error as FmtError, Formatter};
 /// Error to throw when phone number parsing fails
 #[derive(Debug)]
-pub struct SanitizeError(u8);
+pub enum SanitizeError {
+    PhoneParsingError,
+}
 /// The Sanitize trait generalises types that are to be sanitized.
 pub trait Sanitize {
     /// Call this associated method when sanitizing.
@@ -63,9 +65,8 @@ pub trait Sanitize {
 
 impl Display for SanitizeError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), FmtError> {
-        let err = match self.0 {
-            0 => "Invalid phone number",
-            _ => "Undefined error",
+        let err = match self {
+            Self::PhoneParsingError => "Invalid phone number",
         };
         write!(f, "{}", err)
     }
