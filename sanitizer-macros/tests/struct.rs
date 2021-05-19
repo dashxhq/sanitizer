@@ -50,7 +50,7 @@ fn sanitizer_check() {
         phone_number: String::from("+1 (454)"),
         multiple_sanitizers: String::from("    helloWorld123  "),
     };
-    instance.sanitize();
+    instance.sanitize().unwrap();
     assert_eq!(instance.trim, "test");
     assert_eq!(instance.numeric, "8130");
     assert_eq!(instance.alphanumeric, "Hello藏World");

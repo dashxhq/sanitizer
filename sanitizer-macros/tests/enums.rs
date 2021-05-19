@@ -11,8 +11,8 @@ enum EnumTest {
 fn sanitizer_check_enum() {
     let mut instance = EnumTest::Number(9);
     let mut string_instance = EnumTest::String(String::from(" hello"));
-    instance.sanitize();
-    string_instance.sanitize();
+    instance.sanitize().unwrap();
+    string_instance.sanitize().unwrap();
 
     match instance {
         EnumTest::Number(x) => assert_eq!(x, 10),

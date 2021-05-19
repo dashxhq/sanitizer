@@ -104,14 +104,14 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                         body.append_all({
                             quote! {
                                 if let Self::#field(x) = self {
-                                    #call(x);
+                                    #call(x)?;
                                 }
                             }
                         });
                     } else {
                         body.append_all({
                             quote! {
-                                #call(&mut self.#field);
+                                #call(&mut self.#field)?;
                             }
                         });
                     }
@@ -128,8 +128,9 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     let final_body = quote! {
 
         impl sanitizer::Sanitize for #name {
-            fn sanitize(&mut self) {
+            fn sanitize(&mut self) -> Result<(), sanitizer::NumberParseError> {
                 #inner_body
+                Ok(())
             }
         }
     };

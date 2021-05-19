@@ -26,7 +26,7 @@ fn sanitizer_check_custom_functions() {
         field_int: 10,
         field_string: String::from("Hello    "),
     };
-    instance.sanitize();
+    instance.sanitize().unwrap();
     assert_eq!(instance.field_int, 5);
     assert_eq!(instance.field_string, String::from("Hello"));
 }
