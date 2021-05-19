@@ -1,5 +1,5 @@
 use crate::arg::ArgBuilder;
-use crate::codegen::PathOrList;
+use crate::codegen::sanitizers::PathOrList;
 use crate::sanitizer::SanitizerError;
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -31,6 +31,8 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sani
         "upper_case" => Ok(quote! { to_uppercase() }),
         "camel_case" => Ok(quote! { to_camel_case() }),
         "snake_case" => Ok(quote! { to_snake_case() }),
+        "kebab_case" => Ok(quote! { to_kebab_case() }),
+        "screaming_kebab_case" => Ok(quote! { to_screaming_kebab_case() }),
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
         "e164" => Ok(quote! { e164() }),
         "clamp" => {

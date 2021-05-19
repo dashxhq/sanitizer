@@ -2,7 +2,9 @@
 #![forbid(unsafe_code)]
 //! Macros that allows seamless sanitizing
 //! on struct fields
-use crate::codegen::{init_enum, init_struct, methods_layout};
+use crate::codegen::enums::EnumGen;
+use crate::codegen::sanitizers as sanitizer_gen;
+use crate::codegen::structs::StructGen;
 use crate::sanitizer::parse_sanitizers;
 use crate::type_ident::TypeOrNested;
 use proc_macro::TokenStream;
@@ -67,6 +69,8 @@ mod type_ident;
 /// - **upper_case**: Convert input to upper case.
 /// - **camel_case**: Convert input to camel case.
 /// - **snake_case**: Convert input to snake case.
+/// - **kebab_case**: Convert input to kebab case.
+/// - **screaming_kebab_case**: Convert input to shouty kebab case.
 /// - **e164**: Convert a valid phone number to the e164 international standard, panic if invalid phone number.
 /// - **clamp(min, max)**: Limit an integer input to this region of min to max.
 /// - **clamp(max)**: Cut the string if it exceeds max.
@@ -82,41 +86,39 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     if let Ok(ref val) = parsed {
         inner_body.append_all(val.get_map().iter().map(|r| {
             let field = r.0;
-            let mut call = quote! {};
-            let mut init = quote! {};
-            let mut layout = quote! {};
+            let mut body = quote! {};
             match field {
                 TypeOrNested::Type(field, type_ident) => {
-                    layout = methods_layout(r.1, type_ident.clone());
-
+                    let sanitizer_calls = sanitizer_gen::methods_layout(r.1, type_ident.clone());
+                    let stream: TokenStream2;
                     if val.is_enum() {
-                        init_enum(&mut init, type_ident, field, &mut call);
+                        stream = EnumGen::new(field.clone(), type_ident).body(sanitizer_calls);
                     } else {
-                        init_struct(&mut init, type_ident, field, &mut call);
+                        stream = StructGen::new(field.clone(), type_ident).body(sanitizer_calls);
                     }
+                    body.append_all(stream)
                 }
                 TypeOrNested::Nested(field, type_ident) => {
+                    let call = quote! { <#type_ident as Sanitize>::sanitize };
                     if val.is_enum() {
-                        call.append_all({
+                        body.append_all({
                             quote! {
                                 if let Self::#field(x) = self {
-                                    <#type_ident as Sanitize>::sanitize(x);
+                                    #call(x);
                                 }
                             }
                         });
                     } else {
-                        call.append_all({
+                        body.append_all({
                             quote! {
-                                <#type_ident as Sanitize>::sanitize(&mut self.#field);
+                                #call(&mut self.#field);
                             }
                         });
                     }
                 }
             }
             quote! {
-                #init
-                #layout
-                #call
+                #body
             }
         }));
     } else {

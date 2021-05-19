@@ -18,6 +18,10 @@ struct SanitizerTest {
     snake_case: String,
     #[sanitize(screaming_snake_case)]
     screaming_snake_case: String,
+    #[sanitize(kebab_case)]
+    kebab_case: String,
+    #[sanitize(screaming_kebab_case)]
+    screaming_kebab_case: String,
     #[sanitize(clamp(10))]
     clamp_str: String,
     #[sanitize(clamp(10, 50))]
@@ -38,7 +42,9 @@ fn sanitizer_check() {
         upper_case: String::from("hello, world"),
         camel_case: String::from("hello_world"),
         snake_case: String::from("helloWorld"),
-        screaming_snake_case: String::from("helloWorld"),
+        screaming_kebab_case: String::from("hello, world"),
+        kebab_case: String::from("hello, world"),
+        screaming_snake_case: String::from("HELLO-WORLD"),
         clamp_str: String::from("Hello, World"),
         clamp_int: 9,
         phone_number: String::from("+1 (454)"),
@@ -53,6 +59,9 @@ fn sanitizer_check() {
     assert_eq!(instance.camel_case, "helloWorld");
     assert_eq!(instance.snake_case, "hello_world");
     assert_eq!(instance.screaming_snake_case, "HELLO_WORLD");
+    assert_eq!(instance.clamp_str, "Hello, Wor");
+    assert_eq!(instance.kebab_case, "hello-world");
+    assert_eq!(instance.screaming_kebab_case, "HELLO-WORLD");
     assert_eq!(instance.clamp_str, "Hello, Wor");
     assert_eq!(instance.clamp_int, 10);
     assert_eq!(instance.phone_number, "+1454");

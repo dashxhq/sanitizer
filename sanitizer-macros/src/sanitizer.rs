@@ -165,6 +165,7 @@ impl StructOrEnum {
             false
         }
     }
+
     pub fn get_map(&self) -> &FieldMap {
         match self {
             Self::Enum(enum_fields) => enum_fields,
@@ -187,7 +188,7 @@ impl Display for SanitizerError {
             Self::WrongArguments => "Wrong number of arguments",
             Self::Only64BitInt => "The argument can be only 64 bit int",
             Self::EnumsUnamedFields => "Enums can contain only unnamed field",
-            Self::OnlyOptionTSupported => "Only Option<T> supported for now",
+            Self::OnlyOptionTSupported => "Only Option<T> and Option<Option<T>> supported for now",
         };
         write!(f, "{}", case)
     }

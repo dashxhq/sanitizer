@@ -68,6 +68,16 @@ impl StringSanitizer {
         self.0 = self.0.to_snake_case();
         self
     }
+    /// Convert string to kebab case
+    pub fn to_kebab_case(&mut self) -> &mut Self {
+        self.0 = self.0.to_kebab_case();
+        self
+    }
+    /// Convert string to shouty kebab case
+    pub fn to_screaming_kebab_case(&mut self) -> &mut Self {
+        self.0 = self.0.to_shouty_kebab_case();
+        self
+    }
     /// Convert string to screaming snake case
     pub fn to_screaming_snakecase(&mut self) -> &mut Self {
         self.0 = self.0.to_shouty_snake_case();
@@ -140,6 +150,8 @@ mod test {
     string_test!(to_uppercase, "hello" => "HELLO");
     string_test!(to_camel_case, "some_string" => "someString");
     string_test!(to_snake_case, "someString" => "some_string");
+    string_test!(to_kebab_case, "someString" => "some-string");
+    string_test!(to_screaming_kebab_case, "someString" => "SOME-STRING");
     string_test!(to_screaming_snakecase, "someString" => "SOME_STRING");
     string_test!(e164, "+1 (555) 555-1234" => "+15555551234");
 
