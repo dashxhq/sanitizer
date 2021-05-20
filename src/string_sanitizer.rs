@@ -1,4 +1,3 @@
-use crate::*;
 use heck::*;
 use phonenumber::{parse, Mode};
 use std::cmp::PartialEq;
@@ -93,15 +92,13 @@ impl StringSanitizer {
         self
     }
     /// Convert the phone number to the E164 International Standard
-    pub fn e164(&mut self) -> Result<&mut Self, SanitizeError> {
+    pub fn e164(&mut self) -> &mut Self {
         let phone_number = parse(None, &self.0);
 
         if let Ok(number) = phone_number {
             self.0 = number.format().mode(Mode::E164).to_string();
-            Ok(self)
-        } else {
-            Err(SanitizeError::PhoneParsingError)
         }
+        self
     }
     /// Truncate the string with the given amount
     pub fn cut(&mut self, amount: usize) -> &mut Self {
@@ -188,7 +185,8 @@ mod test {
     #[test]
     fn e164() {
         let mut number = StringSanitizer::from("+1 (555) 555-1234");
-        assert_eq!("+15555551234", number.e164().unwrap().0);
+        number.e164();
+        assert_eq!("+15555551234", number.get());
     }
 
     #[test]
@@ -199,10 +197,10 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn wrong_phone_number() {
         let mut sanitize = StringSanitizer::from("Not a Phone Number");
-        sanitize.e164().unwrap();
+        sanitize.e164();
+        assert_eq!("Not a Phone Number", sanitize.get());
     }
 
     #[test]

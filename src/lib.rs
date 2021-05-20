@@ -46,30 +46,12 @@ pub mod prelude {
     #[cfg(feature = "derive")]
     pub use sanitizer_macros::Sanitize;
 }
+/// Sanitizer methods for ints
 pub use crate::int_sanitizer::IntSanitizer;
 /// Sanitizer methods for strings
 pub use crate::string_sanitizer::StringSanitizer;
-/// Sanitizer methods for ints
-use std::error::Error;
-use std::fmt::{Display, Error as FmtError, Formatter};
-/// Error to throw when phone number parsing fails
-#[derive(Debug)]
-pub enum SanitizeError {
-    PhoneParsingError,
-}
 /// The Sanitize trait generalises types that are to be sanitized.
 pub trait Sanitize {
     /// Call this associated method when sanitizing.
-    fn sanitize(&mut self) -> Result<(), SanitizeError>;
+    fn sanitize(&mut self);
 }
-
-impl Display for SanitizeError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), FmtError> {
-        let err = match self {
-            Self::PhoneParsingError => "Invalid phone number",
-        };
-        write!(f, "{}", err)
-    }
-}
-
-impl Error for SanitizeError {}

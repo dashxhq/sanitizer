@@ -34,7 +34,7 @@ pub fn get_string_sanitizers(sanitizer: &PathOrList) -> Result<TokenStream, Sani
         "kebab_case" => Ok(quote! { to_kebab_case() }),
         "screaming_kebab_case" => Ok(quote! { to_screaming_kebab_case() }),
         "screaming_snake_case" => Ok(quote! { to_screaming_snakecase() }),
-        "e164" => Ok(quote! { e164()? }),
+        "e164" => Ok(quote! { e164() }),
         "clamp" => {
             sanitizer_with_arg!(sanitizer, int, &sanitizer.get_args().args[0], cut)
         }

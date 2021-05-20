@@ -48,7 +48,7 @@ fn first_instance() {
         name: String::from(" John Doe "),
         info: other_info,
     };
-    first_instance.sanitize().unwrap();
+    first_instance.sanitize();
     assert_eq!(first_instance.name, "John Doe");
     assert_eq!(first_instance.info.id, "123984");
     assert_eq!(first_instance.info.email, "test@gmail.com");
@@ -57,7 +57,7 @@ fn first_instance() {
 #[test]
 fn second_nesting_instance() {
     let mut other_info = OtherInfo::new();
-    other_info.sanitize().unwrap();
+    other_info.sanitize();
     assert_eq!(other_info.id, "123984");
     assert_eq!(other_info.email, "test@gmail.com");
 }
@@ -66,7 +66,7 @@ fn second_nesting_instance() {
 fn first_instance_enum() {
     let other_info = OtherEnum::Test(String::from(" hello"));
     let mut first_instance = FirstEnum::Test(other_info);
-    first_instance.sanitize().unwrap();
+    first_instance.sanitize();
     match first_instance {
         FirstEnum::Test(x) => {
             if let OtherEnum::Test(y) = x {
@@ -81,7 +81,7 @@ fn first_instance_enum() {
 fn second_nesting_instance_enum() {
     let mut other_info = OtherEnum::Test(String::from(" hello"));
 
-    other_info.sanitize().unwrap();
+    other_info.sanitize();
     if let OtherEnum::Test(y) = other_info {
         assert_eq!(y, String::from("hello"))
     }
