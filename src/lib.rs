@@ -38,17 +38,6 @@
 //! To see a list of available sanitizers, check the [sanitizer-macros crate](https://docs.rs/sanitizer_macros/0.1.0/sanitizer_macros/derive.Sanitize.html)
 mod int_sanitizer;
 mod string_sanitizer;
-
-/// The Sanitize trait generalises types that are to be sanitized.
-pub trait Sanitize {
-    /// Call this associated method when sanitizing.
-    fn sanitize(&mut self);
-}
-/// Sanitizer methods for ints
-pub use crate::int_sanitizer::IntSanitizer;
-/// Sanitizer methods for strings
-pub use crate::string_sanitizer::StringSanitizer;
-
 /// Bring all the sanitizers, the derive macro, and the Sanitize trait in scope
 pub mod prelude {
     pub use crate::int_sanitizer::IntSanitizer;
@@ -56,4 +45,13 @@ pub mod prelude {
     pub use crate::Sanitize;
     #[cfg(feature = "derive")]
     pub use sanitizer_macros::Sanitize;
+}
+/// Sanitizer methods for ints
+pub use crate::int_sanitizer::IntSanitizer;
+/// Sanitizer methods for strings
+pub use crate::string_sanitizer::StringSanitizer;
+/// The Sanitize trait generalises types that are to be sanitized.
+pub trait Sanitize {
+    /// Call this associated method when sanitizing.
+    fn sanitize(&mut self);
 }
