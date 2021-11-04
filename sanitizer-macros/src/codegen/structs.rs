@@ -89,12 +89,10 @@ impl StructGen {
             let new_value = self.new_value();
             if self.is_option_nested {
                 rest.append_all(quote! {
-                    if let Some(x) = #operand {
-                        if let Some(y) = x {
-                            instance = #new_value
-                            #sanitizers
-                            self.#field = #call
-                        };
+                    if let Some(Some(x)) = #operand {
+                        instance = #new_value
+                        #sanitizers
+                        self.#field = #call
                     };
                 })
             } else {
