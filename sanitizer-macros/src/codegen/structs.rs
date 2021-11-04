@@ -52,12 +52,7 @@ impl StructGen {
 
     fn new_value(&self) -> TokenStream {
         let field_value = Sanitization::new(self.is_int);
-        let val: TokenStream;
-        if self.is_option_nested {
-            val = field_value.field(&quote! { y });
-        } else {
-            val = field_value.field(&quote! { x });
-        }
+        let val = field_value.field(&quote! { x });
         field_value.method_calls(val)
     }
 
@@ -89,12 +84,10 @@ impl StructGen {
             let new_value = self.new_value();
             if self.is_option_nested {
                 rest.append_all(quote! {
-                    if let Some(x) = #operand {
-                        if let Some(y) = x {
-                            instance = #new_value
-                            #sanitizers
-                            self.#field = #call
-                        };
+                    if let Some(Some(x)) = #operand {
+                        instance = #new_value
+                        #sanitizers
+                        self.#field = #call
                     };
                 })
             } else {

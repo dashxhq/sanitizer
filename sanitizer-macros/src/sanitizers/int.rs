@@ -4,7 +4,6 @@ use crate::sanitizer::SanitizerError;
 use proc_macro2::TokenStream;
 use quote::quote;
 
-#[macro_use]
 macro_rules! sanitizer_with_arg {
     ( $sanitizer : expr, $body : expr ) => {
         if $sanitizer.has_args() {

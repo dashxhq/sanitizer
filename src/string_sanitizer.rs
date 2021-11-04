@@ -157,7 +157,6 @@ impl PartialEq<String> for StringSanitizer {
 mod test {
     use super::*;
 
-    #[macro_use]
     macro_rules! string_test {
         ( $sanitizer : ident, $from : expr => $to : expr ) => {
             paste::paste! {
