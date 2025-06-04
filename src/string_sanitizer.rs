@@ -58,12 +58,7 @@ impl StringSanitizer {
     }
     /// Convert string to camel case
     pub fn to_camel_case(&mut self) -> &mut Self {
-        let s = self.0.to_camel_case();
-        let mut c = s.chars();
-        self.0 = match c.next() {
-            None => String::new(),
-            Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
-        };
+        self.0 = self.0.to_lower_camel_case();
         self
     }
     /// Convert string to snake case
