@@ -1,12 +1,13 @@
 [package]
 name = "sanitizer"
-description = "A collection of methods and macros to sanitize struct fields"
-keywords = ["sanitizer", "validate", "trim", "e164", "case"]
-categories = ["text-processing", "value-formatting"]
 version = "0.1.7"
-authors = ["weegee <dakshupadhyay991@gmail.com>"]
+authors = ["DGulshan <11533177+DGulshan@users.noreply.github.com>", "Daksh14 <41485688+Daksh14@users.noreply.github.com>"]
+edition = "2024"
+description = "A collection of methods and macros to sanitize struct fields."
+repository = "https://github.com/dashxhq/sanitizer"
 license = "MIT"
-edition = "2018"
+keywords = ["sanitizer", "validate", "trim", "e164"]
+categories = ["text-processing", "value-formatting"]
 
 [dependencies]
 heck = "0.5.0"

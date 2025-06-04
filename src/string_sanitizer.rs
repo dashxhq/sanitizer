@@ -1,5 +1,5 @@
 use heck::*;
-use phonenumber::{parse, Mode};
+use phonenumber::{Mode, parse};
 use std::cmp::PartialEq;
 use std::convert::From;
 use std::ops::Deref;
