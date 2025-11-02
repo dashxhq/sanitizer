@@ -59,8 +59,7 @@ impl StringSanitizer {
     }
     /// Convert string to camel case
     pub fn to_camel_case(&mut self) -> &mut Self {
-        let s = self.0.to_lower_camel_case();
-        self.0 = s;
+        self.0 = self.0.to_lower_camel_case();
         self
     }
     /// Convert string to snake case
