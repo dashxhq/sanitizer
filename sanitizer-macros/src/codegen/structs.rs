@@ -1,8 +1,8 @@
-use crate::codegen::sanitization::Sanitization;
 use crate::codegen::Entity;
+use crate::codegen::sanitization::Sanitization;
 use crate::type_ident::TypeIdent;
 use proc_macro2::TokenStream;
-use quote::{quote, TokenStreamExt};
+use quote::{TokenStreamExt, quote};
 
 pub struct StructGen {
     field_name: Entity,

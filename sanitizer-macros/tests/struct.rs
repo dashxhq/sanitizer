@@ -1,34 +1,34 @@
 use sanitizer::prelude::*;
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct SanitizerTest {
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     trim: String,
-    #[sanitize(numeric)]
+    #[sanitizer(numeric)]
     numeric: String,
-    #[sanitize(alphanumeric)]
+    #[sanitizer(alphanumeric)]
     alphanumeric: String,
-    #[sanitize(lower_case)]
+    #[sanitizer(lower_case)]
     lower_case: String,
-    #[sanitize(upper_case)]
+    #[sanitizer(upper_case)]
     upper_case: String,
-    #[sanitize(camel_case)]
+    #[sanitizer(camel_case)]
     camel_case: String,
-    #[sanitize(snake_case)]
+    #[sanitizer(snake_case)]
     snake_case: String,
-    #[sanitize(screaming_snake_case)]
+    #[sanitizer(screaming_snake_case)]
     screaming_snake_case: String,
-    #[sanitize(kebab_case)]
+    #[sanitizer(kebab_case)]
     kebab_case: String,
-    #[sanitize(screaming_kebab_case)]
+    #[sanitizer(screaming_kebab_case)]
     screaming_kebab_case: String,
-    #[sanitize(clamp(10))]
+    #[sanitizer(clamp(10))]
     clamp_str: String,
-    #[sanitize(clamp(10, 50))]
+    #[sanitizer(clamp(10, 50))]
     clamp_int: u8,
-    #[sanitize(e164)]
+    #[sanitizer(e164)]
     phone_number: String,
-    #[sanitize(trim, screaming_snake_case)]
+    #[sanitizer(trim, screaming_snake_case)]
     multiple_sanitizers: String,
 }
 

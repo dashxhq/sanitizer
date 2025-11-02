@@ -7,11 +7,11 @@ Derive macros for sanitizer crate
 ```rust
 use sanitizer::prelude::*;
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct User {
-	#[sanitize(trim)]
+	#[sanitizer(trim)]
 	name: String,
-	#[sanitize(trim, lower_case)]
+	#[sanitizer(trim, lower_case)]
 	email: String
 }
 ```

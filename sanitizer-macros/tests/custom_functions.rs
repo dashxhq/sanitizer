@@ -1,10 +1,10 @@
 use sanitizer::prelude::*;
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct SanitizerTest {
-    #[sanitize(custom(func_int))]
+    #[sanitizer(custom(func_int))]
     field_int: u8,
-    #[sanitize(custom(func_string))]
+    #[sanitizer(custom(func_string))]
     field_string: String,
 }
 

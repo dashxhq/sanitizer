@@ -59,7 +59,7 @@ pub fn populate_map_struct(
         // get the attributes over the field
         for attr in field.attrs.iter() {
             // parse the attribute
-            if attr.path.is_ident("sanitize") {
+            if attr.path.is_ident("sanitizer") {
                 push = true;
                 field_type = TypeIdent::try_from(field.ty.clone())?;
                 type_field.set_type(field_type.clone());
@@ -108,7 +108,7 @@ pub fn populate_map_enum(
         let mut push = false;
         for attr in variant.attrs.iter() {
             let meta = attr.parse_meta().unwrap();
-            if attr.path.is_ident("sanitize") {
+            if attr.path.is_ident("sanitizer") {
                 push = true;
                 match meta {
                     // the attribute should be a list. for eg. sanitise(options)

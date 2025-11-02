@@ -16,20 +16,20 @@ Then to use the crate
 ```rust
 use sanitizer::prelude::*;
 
-#[derive(Debug, Sanitize)]
+#[derive(Debug, Sanitizer)]
 struct SignupData {
-    #[sanitize(trim, lower_case)]
+    #[sanitizer(trim, lower_case)]
     mail: String,
-    #[sanitize(clamp(1, 60))]
+    #[sanitizer(clamp(1, 60))]
     age: u8,
-    #[sanitize]
+    #[sanitizer]
     user: User,
 }
 
-#[derive(Debug, Sanitize)]
+#[derive(Debug, Sanitizer)]
 struct User {
     id: u64,
-    #[sanitize(trim, clamp(50))]
+    #[sanitizer(trim, clamp(50))]
     name: String,
 }
 
@@ -109,9 +109,9 @@ Use a custom function to sanitize a field differently. For example
 
 ```rust
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct SanitizerTest {
-    #[sanitize(custom(func_string))]
+    #[sanitizer(custom(func_string))]
     field_string: String,
 }
 
@@ -134,19 +134,19 @@ fn sanitizer_check_custom_functions() {
 ### nesting
 
 ```rust
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct First {
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     name: String,
-    #[sanitize]
+    #[sanitizer]
     info: OtherInfo,
 }
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct OtherInfo {
-    #[sanitize(numeric)]
+    #[sanitizer(numeric)]
     id: String,
-    #[sanitize(lower_case, trim)]
+    #[sanitizer(lower_case, trim)]
     email: String,
 }
 
