@@ -2,7 +2,7 @@
 name = "sanitizer"
 description = "A collection of methods and macros to sanitize struct fields."
 repository = "https://github.com/dashxhq/sanitizer"
-version = "0.1.7"
+version = "1.0.0"
 license = "MIT"
 edition = "2024"
 keywords = ["sanitizer", "validate", "trim", "e164"]
@@ -16,7 +16,7 @@ num-traits = "0.2.19"
 
 [dependencies.sanitizer_macros]
 path = "sanitizer-macros"
-version = "0.2.2"
+version = "1.0.0"
 optional = true
 
 [features]

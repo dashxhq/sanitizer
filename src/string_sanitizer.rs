@@ -3,6 +3,7 @@ use phonenumber::{Mode, parse};
 use std::cmp::PartialEq;
 use std::convert::From;
 use std::ops::Deref;
+
 /// The Sanitizer structure is a wrapper over a String type which is to
 /// be sanitized.
 ///
@@ -157,9 +158,9 @@ mod test {
             paste::paste! {
                 #[test]
                 fn [<$sanitizer>]() {
-                    let mut sanitize = StringSanitizer::from($from);
-                    sanitize.$sanitizer();
-                    assert_eq!($to, sanitize.get());
+                    let mut sanitizer = StringSanitizer::from($from);
+                    sanitizer.$sanitizer();
+                    assert_eq!($to, sanitizer.get());
                 }
             }
         };
@@ -185,22 +186,22 @@ mod test {
 
     #[test]
     fn clamp_max() {
-        let mut sanitize = StringSanitizer::from("someString");
-        sanitize.clamp_max(9);
-        assert_eq!("someStrin", sanitize.get());
+        let mut sanitizer = StringSanitizer::from("someString");
+        sanitizer.clamp_max(9);
+        assert_eq!("someStrin", sanitizer.get());
     }
 
     #[test]
     fn wrong_phone_number() {
-        let mut sanitize = StringSanitizer::from("Not a Phone Number");
-        sanitize.e164();
-        assert_eq!("Not a Phone Number", sanitize.get());
+        let mut sanitizer = StringSanitizer::from("Not a Phone Number");
+        sanitizer.e164();
+        assert_eq!("Not a Phone Number", sanitizer.get());
     }
 
     #[test]
     fn multiple_lints() {
-        let mut sanitize = StringSanitizer::from("    some_string12 ");
-        sanitize.trim().numeric();
-        assert_eq!("12", sanitize.get());
+        let mut sanitizer = StringSanitizer::from("    some_string12 ");
+        sanitizer.trim().numeric();
+        assert_eq!("12", sanitizer.get());
     }
 }
