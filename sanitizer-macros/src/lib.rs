@@ -9,8 +9,8 @@ use crate::sanitizer::parse_sanitizers;
 use crate::type_ident::TypeOrNested;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, TokenStreamExt};
-use syn::{parse_macro_input, DeriveInput};
+use quote::{TokenStreamExt, quote};
+use syn::{DeriveInput, parse_macro_input};
 
 // argument parsing and storing
 mod arg;

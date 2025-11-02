@@ -3,7 +3,7 @@ use crate::sanitizer::SanitizerError;
 use crate::sanitizers::*;
 use crate::type_ident::TypeIdent;
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, TokenStreamExt};
+use quote::{TokenStreamExt, quote};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use syn::{Lit, Meta, NestedMeta};

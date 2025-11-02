@@ -40,9 +40,9 @@ mod int_sanitizer;
 mod string_sanitizer;
 /// Bring all the sanitizers, the derive macro, and the Sanitizer trait in scope
 pub mod prelude {
+    pub use crate::Sanitizer;
     pub use crate::int_sanitizer::IntSanitizer;
     pub use crate::string_sanitizer::StringSanitizer;
-    pub use crate::Sanitizer;
     #[cfg(feature = "derive")]
     pub use sanitizer_macros::Sanitizer;
 }
