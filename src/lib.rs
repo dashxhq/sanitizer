@@ -40,9 +40,9 @@ mod int_sanitizer;
 mod string_sanitizer;
 /// Bring all the sanitizers, the derive macro, and the Sanitize trait in scope
 pub mod prelude {
+    pub use crate::Sanitize;
     pub use crate::int_sanitizer::IntSanitizer;
     pub use crate::string_sanitizer::StringSanitizer;
-    pub use crate::Sanitize;
     #[cfg(feature = "derive")]
     pub use sanitizer_macros::Sanitize;
 }
@@ -54,4 +54,62 @@ pub use crate::string_sanitizer::StringSanitizer;
 pub trait Sanitize {
     /// Call this associated method when sanitizing.
     fn sanitize(&mut self);
+}
+
+/// Generic `impl` for sanitizing values wrapped in an [Option]:
+///
+/// ```rust
+/// use sanitizer::Sanitize;
+///
+/// #[derive(Debug, PartialEq)]
+/// struct MyValue(i32);
+///
+/// impl Sanitize for MyValue {
+///     /// If the inner value is `0`, change it to `1`.
+///     fn sanitize(&mut self) {
+///         if self.0 == 0 {
+///             self.0 = 1;
+///         }
+///     }
+/// }
+///
+/// let mut wrapped_value = Some(MyValue(0));
+/// wrapped_value.sanitize();
+/// assert_eq!(wrapped_value, Some(MyValue(1)));
+/// ```
+impl<T: Sanitize> Sanitize for Option<T> {
+    fn sanitize(&mut self) {
+        if let Some(inner) = self.as_mut() {
+            inner.sanitize();
+        }
+    }
+}
+
+/// Generic `impl` for sanitizing values in a [Vec]:
+///
+/// ```rust
+/// use sanitizer::Sanitize;
+///
+/// #[derive(Debug, PartialEq)]
+/// struct MyValue(i32);
+///
+/// impl Sanitize for MyValue {
+///     /// If the inner value is `0`, change it to `1`.
+///     fn sanitize(&mut self) {
+///         if self.0 == 0 {
+///             self.0 = 1;
+///         }
+///     }
+/// }
+///
+/// let mut values = vec![MyValue(0), MyValue(2)];
+/// values.sanitize();
+/// assert_eq!(values, vec![MyValue(1), MyValue(2)]);
+/// ```
+impl<T: Sanitize> Sanitize for Vec<T> {
+    fn sanitize(&mut self) {
+        for item in self.iter_mut() {
+            item.sanitize()
+        }
+    }
 }
