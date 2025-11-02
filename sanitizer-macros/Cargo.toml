@@ -1,11 +1,10 @@
 [package]
 name = "sanitizer_macros"
-version = "0.2.2"
-edition = "2018"
-authors = ["weegee <dakshupadhyay991@gmail.com>"]
-license = "MIT"
 description = "Derive macro for the sanitizer crate"
 keywords = ["sanitizer-macro", "macro"]
+version = "1.0.0"
+edition = "2024"
+license = "MIT"
 
 [lib]
 proc-macro = true

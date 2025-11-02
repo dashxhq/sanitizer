@@ -10,18 +10,18 @@
 //!
 //! If you want your incoming data which is serialised to a
 //! structure to be sanitized then first of all, you make a struct
-//! and derive the Sanitize trait on it.
+//! and derive the Sanitizer trait on it.
 //! The macro will implement the trait for you all you have to do
 //! now is to call the sanitize method on the trait
 //!
 //! ```
 //! use sanitizer::prelude::*;
 //!
-//! #[derive(Sanitize)]
+//! #[derive(Sanitizer)]
 //! struct User {
-//! 	#[sanitize(trim)]
+//! 	#[sanitizer(trim)]
 //! 	name: String,
-//! 	#[sanitize(trim, lower_case)]
+//! 	#[sanitizer(trim, lower_case)]
 //! 	email: String
 //! }
 //!
@@ -38,20 +38,20 @@
 //! To see a list of available sanitizers, check the [sanitizer-macros crate](https://docs.rs/sanitizer_macros/0.1.0/sanitizer_macros/derive.Sanitize.html)
 mod int_sanitizer;
 mod string_sanitizer;
-/// Bring all the sanitizers, the derive macro, and the Sanitize trait in scope
+/// Bring all the sanitizers, the derive macro, and the Sanitizer trait in scope
 pub mod prelude {
     pub use crate::int_sanitizer::IntSanitizer;
     pub use crate::string_sanitizer::StringSanitizer;
-    pub use crate::Sanitize;
+    pub use crate::Sanitizer;
     #[cfg(feature = "derive")]
-    pub use sanitizer_macros::Sanitize;
+    pub use sanitizer_macros::Sanitizer;
 }
 /// Sanitizer methods for ints
 pub use crate::int_sanitizer::IntSanitizer;
 /// Sanitizer methods for strings
 pub use crate::string_sanitizer::StringSanitizer;
-/// The Sanitize trait generalises types that are to be sanitized.
-pub trait Sanitize {
+/// The Sanitizer trait generalises types that are to be sanitized.
+pub trait Sanitizer {
     /// Call this associated method when sanitizing.
     fn sanitize(&mut self);
 }

@@ -1,33 +1,33 @@
 use sanitizer::prelude::*;
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct First {
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     name: String,
-    #[sanitize]
+    #[sanitizer]
     info: OtherInfo,
 }
 
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 struct OtherInfo {
-    #[sanitize(numeric)]
+    #[sanitizer(numeric)]
     id: String,
-    #[sanitize(lower_case, trim)]
+    #[sanitizer(lower_case, trim)]
     email: String,
 }
 
 #[allow(dead_code)]
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 enum FirstEnum {
-    #[sanitize]
+    #[sanitizer]
     Test(OtherEnum),
     None,
 }
 
 #[allow(dead_code)]
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 enum OtherEnum {
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     Test(String),
     None,
 }

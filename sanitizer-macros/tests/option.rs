@@ -1,20 +1,20 @@
 use sanitizer::prelude::*;
 
-#[derive(Sanitize, Default)]
+#[derive(Sanitizer, Default)]
 struct First {
     // basic option should work
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     name: Option<String>,
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     // even with random paths
     address: std::option::Option<std::string::String>,
-    #[sanitize(clamp(1, 18))]
+    #[sanitizer(clamp(1, 18))]
     // even with ints
     age: std::option::Option<u8>,
     // double option nested
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     name_last: Option<Option<String>>,
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     // None values should NOT be sanitized
     city: Option<String>,
     // Same with nested options

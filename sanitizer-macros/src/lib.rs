@@ -23,7 +23,7 @@ mod sanitizers;
 // types and stuff
 mod type_ident;
 
-/// The Sanitize derive macro implements the Sanitize trait for you.
+/// The Sanitizer derive macro implements the Sanitizer trait for you.
 /// The trait only has a single associated function called `sanitize`
 /// which edits the fields based on the sanitizer you specified in
 /// the helper attributes
@@ -33,11 +33,11 @@ mod type_ident;
 /// ```
 /// use sanitizer::prelude::*;
 ///
-/// #[derive(Sanitize)]
+/// #[derive(Sanitizer)]
 /// struct User {
-///    #[sanitize(trim)]
+///    #[sanitizer(trim)]
 ///    name: String,
-///    #[sanitize(custom(eight))]
+///    #[sanitizer(custom(eight))]
 ///    acc_no: u8
 /// }
 ///
@@ -77,7 +77,7 @@ mod type_ident;
 /// - **screaming_snake_case**: Convert input to screaming snake case.
 /// - **custom(function)**: A custom function that is called to sanitize a field
 /// according to any other way.
-#[proc_macro_derive(Sanitize, attributes(sanitize))]
+#[proc_macro_derive(Sanitizer, attributes(sanitizer))]
 pub fn sanitize(input: TokenStream) -> TokenStream {
     let input_parsed = parse_macro_input!(input as DeriveInput);
     let name = input_parsed.ident;
@@ -99,7 +99,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
                     body.append_all(stream)
                 }
                 TypeOrNested::Nested(field, type_ident) => {
-                    let call = quote! { <#type_ident as Sanitize>::sanitize };
+                    let call = quote! { <#type_ident as Sanitizer>::sanitize };
                     if val.is_enum() {
                         body.append_all({
                             quote! {
@@ -127,7 +127,7 @@ pub fn sanitize(input: TokenStream) -> TokenStream {
     }
     let final_body = quote! {
 
-        impl sanitizer::Sanitize for #name {
+        impl sanitizer::Sanitizer for #name {
             fn sanitize(&mut self) {
                 #inner_body
             }

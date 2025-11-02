@@ -1,9 +1,9 @@
 use sanitizer::prelude::*;
-#[derive(Sanitize)]
+#[derive(Sanitizer)]
 enum EnumTest {
-    #[sanitize(clamp(10, 50))]
+    #[sanitizer(clamp(10, 50))]
     Number(u8),
-    #[sanitize(trim)]
+    #[sanitizer(trim)]
     String(String),
 }
 
